@@ -12,14 +12,6 @@ export async function clearDatabase() {
 }
 
 export function createUserEmailPasswordData() {
-  const email = `test${Math.random() * 10000000}@example.com`;
+  const email = `test${Math.floor(Math.random() * 10000000)}@example.com`;
   return { email, password: email };
-}
-
-export async function createUserEmailPassword(email: string, password: string) {
-  return await testPb.collection("users").create({
-    email,
-    password,
-    passwordConfirm: password,
-  });
 }
