@@ -1,16 +1,17 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { clearDatabase, createUserEmailPasswordData } from "./helpers/pocketbaseTestHelpers";
 import { testPb } from "../config/pocketbaseConfig";
-
-const usersCollectionName = "users";
-const globalUserPermissionsCollectionName = "globalUserPermissions";
+import {
+  globalUserPermissionsCollectionName,
+  usersCollectionName,
+} from "./helpers/pocketbaseMetadata";
 
 describe("PocketBase users collection global permissions", () => {
   beforeEach(async () => {
     await clearDatabase();
   });
 
-  it.only("allow create: user with valid email and password", async () => {
+  it.only("allow create: user when providing a valid email and password", async () => {
     const { email, password } = createUserEmailPasswordData();
     const createdUser = await testPb.collection(usersCollectionName).create({
       email,

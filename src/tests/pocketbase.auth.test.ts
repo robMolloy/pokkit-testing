@@ -1,8 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { testPb } from "../config/pocketbaseConfig";
 import { clearDatabase, createUserEmailPasswordData } from "./helpers/pocketbaseTestHelpers";
-
-const usersCollectionName = "users";
+import { usersCollectionName } from "./helpers/pocketbaseMetadata";
 
 describe("PocketBase users collection rules", () => {
   beforeEach(async () => {
