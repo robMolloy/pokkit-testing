@@ -1,10 +1,9 @@
-import path from "path";
-import tailwindcss from "@tailwindcss/vite";
+/// <reference types="vite/client" />
+/// <reference types="vitest" />
+
 import type { ConfigEnv } from "vite";
-import { defineConfig } from "vitest/config";
 import { loadEnv } from "vite";
-import react from "@vitejs/plugin-react";
-import Pages from "vite-plugin-pages";
+import { defineConfig } from "vitest/config";
 
 export default (p: { mode: ConfigEnv }) => {
   const env = loadEnv(p.mode.command, process.cwd(), "");
@@ -12,21 +11,8 @@ export default (p: { mode: ConfigEnv }) => {
   return defineConfig({
     base: env.VITE_APP_BASE_URL,
     test: {
-      environment: "node", // important for PocketBase
-      globals: true, // allows describe/it/expect without imports
-    },
-    plugins: [
-      react(),
-      tailwindcss(),
-      Pages({
-        dirs: "src/pages",
-        extensions: ["page.tsx", "tsx"],
-      }),
-    ],
-    resolve: {
-      alias: {
-        "@": path.resolve(__dirname, "./src"),
-      },
+      globals: true,
+      environment: "node",
     },
   });
 };

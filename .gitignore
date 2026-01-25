@@ -23,7 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 
-pocketbase-leader/pb_data/*
-!pocketbase-leader/pb_data/backups
+pocketbase/app-db/pb_data/*
+!pocketbase/app-db/pb_data/backups
 
-pocketbase-leader/pb_migrations/*
+pocketbase/test-db/*
+!pocketbase/test-db/pocketbase
