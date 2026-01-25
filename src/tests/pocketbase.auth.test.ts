@@ -1,18 +1,16 @@
 import { describe, expect, it, beforeEach } from "vitest";
 import { testPb } from "../config/pocketbaseConfig";
+import {
+  clearDatabase,
+  createUserEmailPassword,
+  createUserEmailPasswordData,
+} from "./helpers/pocketbaseTestHelpers";
 
 const usersCollectionName = "users";
 
 describe("PocketBase users collection rules", () => {
   beforeEach(async () => {
-    await testPb.collection("_superusers").authWithPassword("admin@admin.com", "admin@admin.com");
-
-    const resp = await testPb.collections.getFullList();
-    const nonSuperuserCollections = resp.filter((coll) => coll.name !== "_superusers");
-    for (const coll of nonSuperuserCollections) {
-      await testPb.collections.truncate(coll.name);
-    }
-    testPb.authStore.clear();
+    await clearDatabase();
   });
 
   it("rejects invalid credentials", async () => {
@@ -22,13 +20,21 @@ describe("PocketBase users collection rules", () => {
   });
 
   it("allows valid credentials", async () => {
-    const resp = await testPb
-      .collection(usersCollectionName)
-      .create({
-        email: `rob${Math.random() * 10000000}@rob.com`,
-        password: "rob@rob.com",
-        passwordConfirm: "rob@rob.com",
-      });
+    const { email, password } = createUserEmailPasswordData();
+    const resp = await createUserEmailPassword(email, password);
     expect(resp.id).not.toBeNull();
+  });
+
+  it("denies access to records when not authenticated", async () => {
+    const { email, password } = createUserEmailPasswordData();
+    const createdUser = await createUserEmailPassword(email, password);
+
+    // Verify unauthenticated access is denied
+    await expect(testPb.collection(usersCollectionName).getOne(createdUser.id)).rejects.toThrow();
+
+    // Verify authenticated access is allowed
+    await testPb.collection(usersCollectionName).authWithPassword(email, password);
+    const record = await testPb.collection(usersCollectionName).getOne(createdUser.id);
+    expect(record.id).toBe(createdUser.id);
   });
 });
