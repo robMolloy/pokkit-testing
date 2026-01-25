@@ -13,6 +13,7 @@ export default (p: { mode: ConfigEnv }) => {
     test: {
       globals: true,
       environment: "node",
+      fileParallelism: false,
     },
   });
 };
