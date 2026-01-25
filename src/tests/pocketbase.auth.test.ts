@@ -13,19 +13,19 @@ describe("PocketBase users collection rules", () => {
     await clearDatabase();
   });
 
-  it("rejects invalid credentials", async () => {
+  it("deny log in: user with invalid credentials", async () => {
     await expect(
       testPb.collection("users").authWithPassword("test@example.com", "wrong-password"),
     ).rejects.toThrow();
   });
 
-  it("allows valid credentials", async () => {
+  it("allow create: user with valid email and password", async () => {
     const { email, password } = createUserEmailPasswordData();
     const resp = await createUserEmailPassword(email, password);
     expect(resp.id).not.toBeNull();
   });
 
-  it("denies access to records when not authenticated", async () => {
+  it("deny read: user record when not authenticated; allow read: user record when authenticated", async () => {
     const { email, password } = createUserEmailPasswordData();
     const createdUser = await createUserEmailPassword(email, password);
 
