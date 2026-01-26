@@ -11,6 +11,8 @@
     "test-db:start": "./pocketbase/test-db/pocketbase serve --http=\"0.0.0.0:8091\" --migrationsDir=\"pocketbase/app-db/pb_migrations\" --hooksDir=\"pocketbase/app-db/pb_hooks\" ",
     "test-db:clone-from-app-db-seed": "pocketbase/scripts/test-db-clone-from-app-db-seed.mjs",
     "test-db:clone-from-app-db-seed:watch": "npx nodemon --watch pocketbase/app-db/pb_migrations --watch pocketbase/app-db/pb_hooks --delay 2 --exec \"npm run test-db:clone-from-app-db-seed\" ",
+    "app-db:create-backup": "pocketbase/scripts/app-db-create-backup.mjs",
+    "app-db:get-collections": "pocketbase/scripts/app-db-get-collections.mjs",
     "dev1": "npm run test",
     "dev2": "npm run tsc",
     "dev3": "npm run app-db:start",
