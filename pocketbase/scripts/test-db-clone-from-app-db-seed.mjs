@@ -39,7 +39,6 @@ const createSeed = async (pb, seedName) => {
   }
 };
 
-// await pb.backups.upload({ file: new Blob([...]) });
 const uploadSeed = async (pb, blob) => {
   try {
     await pb.backups.upload({ file: blob, name: "seed.zip" });
@@ -66,10 +65,10 @@ const main = async () => {
   await appPb.collection("_superusers").authWithPassword("admin@admin.com", "admin@admin.com");
   await testPb.collection("_superusers").authWithPassword("admin@admin.com", "admin@admin.com");
 
-  const deleteAppDbSeedResponse = await deleteSeed(appPb, "seed.zip");
-  const deleteTestDbSeedResponse = await deleteSeed(testPb, "seed.zip");
+  await deleteSeed(appPb, "seed.zip");
+  await deleteSeed(testPb, "seed.zip");
 
-  const createSeedResponse = await createSeed(appPb, "seed.zip");
+  await createSeed(appPb, "seed.zip");
 
   const getFileAsBlobResponse = await getFileAsBlobIfExists(`${appDbBackupsBasePath}/seed.zip`);
 
@@ -78,8 +77,8 @@ const main = async () => {
     return;
   }
 
-  const uploadSeedResponse = await uploadSeed(testPb, getFileAsBlobResponse.blob);
+  await uploadSeed(testPb, getFileAsBlobResponse.blob);
 
-  const restoreSeedResponse = await restoreSeed(testPb, "seed.zip");
+  await restoreSeed(testPb, "seed.zip");
 };
 main();

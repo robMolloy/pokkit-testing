@@ -24,6 +24,7 @@ dist-ssr
 *.sw?
 
 pocketbase/app-db/pb_data/*
+pocketbase/app-db/pb_migrations/*
 !pocketbase/app-db/pb_data/backups
 
 pocketbase/test-db/*
