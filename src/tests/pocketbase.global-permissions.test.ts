@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { clearDatabase } from "./helpers/pocketbaseTestHelpers";
-import { testPb } from "../config/pocketbaseConfig";
+import { userPb } from "../config/pocketbaseConfig";
 import {
   globalUserPermissionsCollectionName,
   usersCollectionName,
@@ -14,17 +14,17 @@ describe("PocketBase users collection global permissions", () => {
 
   it.only("allow create and read: first user receives approved admin global permission", async () => {
     const { email, password } = createUserEmailPasswordData();
-    const userRecord = await testPb.collection(usersCollectionName).create({
+    const userRecord = await userPb.collection(usersCollectionName).create({
       email,
       password,
       passwordConfirm: password,
     });
 
-    await testPb.collection(usersCollectionName).authWithPassword(email, password);
+    await userPb.collection(usersCollectionName).authWithPassword(email, password);
 
     expect(userRecord.id).not.toBeNull();
 
-    const createdGlobalUserPermissionsRecord = await testPb
+    const createdGlobalUserPermissionsRecord = await userPb
       .collection(globalUserPermissionsCollectionName)
       .getOne(userRecord.id);
 
@@ -32,10 +32,10 @@ describe("PocketBase users collection global permissions", () => {
     expect(createdGlobalUserPermissionsRecord.role).toBe("admin");
     expect(createdGlobalUserPermissionsRecord.status).toBe("approved");
 
-    testPb.authStore.clear();
+    userPb.authStore.clear();
 
     await expect(
-      testPb.collection(globalUserPermissionsCollectionName).getOne(userRecord.id),
+      userPb.collection(globalUserPermissionsCollectionName).getOne(userRecord.id),
     ).rejects.toThrow();
   });
 });
