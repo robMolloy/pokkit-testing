@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { userPb } from "../config/pocketbaseConfig";
-import { usersCollectionName } from "./helpers/pocketbaseMetadata";
+import {
+  globalUserPermissionsCollectionName,
+  usersCollectionName,
+} from "./helpers/pocketbaseMetadata";
 import { clearDatabase } from "./helpers/pocketbaseTestHelpers";
 import { createUserEmailPasswordData, createUserRecord } from "./helpers/pocketbaseUserHelpers";
 
@@ -12,6 +15,7 @@ describe(`PocketBase user collection view rules as standard user`, () => {
   beforeEach(async () => {
     await clearDatabase();
   });
+
   it("allows user to view own record", async () => {
     // throwaway record - first user gains an approved admin global permission
     await createUserRecord({ pb: userPb });
@@ -56,6 +60,7 @@ describe(`PocketBase user collection view rules as standard user`, () => {
     //attempt to get user2 record
     await expect(userPb.collection(usersCollectionName).getOne(createResp2.id)).rejects.toThrow();
   });
+
   it("deny logged out user to view any users record", async () => {
     // throwaway record - first user gains an approved admin global permission
     await createUserRecord({ pb: userPb });
@@ -78,5 +83,53 @@ describe(`PocketBase user collection view rules as standard user`, () => {
     await expect(userPb.collection(usersCollectionName).getOne(createResp1.id)).rejects.toThrow();
     //attempt to get user2 record
     await expect(userPb.collection(usersCollectionName).getOne(createResp2.id)).rejects.toThrow();
+  });
+});
+
+describe(`PocketBase user collection view rules as admin user`, () => {
+  beforeEach(async () => {
+    await clearDatabase();
+  });
+
+  it("allow admin user to view user's record (inc. own)", async () => {
+    const adminUserData = createUserEmailPasswordData();
+    const adminUserRecord = await userPb.collection(usersCollectionName).create({
+      email: adminUserData.email,
+      password: adminUserData.password,
+      passwordConfirm: adminUserData.password,
+    });
+
+    const userData1 = createUserEmailPasswordData();
+    const userDataRecord1 = await userPb.collection(usersCollectionName).create({
+      email: userData1.email,
+      password: userData1.password,
+      passwordConfirm: userData1.password,
+    });
+
+    const userData2 = createUserEmailPasswordData();
+    const userDataRecord2 = await userPb.collection(usersCollectionName).create({
+      email: userData2.email,
+      password: userData2.password,
+      passwordConfirm: userData2.password,
+    });
+
+    // log in as admin user
+    await userPb
+      .collection(usersCollectionName)
+      .authWithPassword(adminUserData.email, adminUserData.password);
+
+    // check user has admin global permission
+    const adminGlobalUserPermissionRecord = await userPb
+      .collection(globalUserPermissionsCollectionName)
+      .getOne(adminUserRecord.id);
+    expect(adminGlobalUserPermissionRecord.role).toBe("admin");
+
+    //attempt to get user1 record
+    const resp1 = await userPb.collection(usersCollectionName).getOne(userDataRecord1.id);
+    expect(resp1.id).toBe(userDataRecord1.id);
+
+    //attempt to get user2 record
+    const resp2 = await userPb.collection(usersCollectionName).getOne(userDataRecord2.id);
+    expect(resp2.id).toBe(userDataRecord2.id);
   });
 });
