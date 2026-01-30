@@ -60,13 +60,15 @@ const restoreSeed = async (pb, seedName) => {
 };
 
 const main = async () => {
-  console.log(process.env.TEST_SEED_FILE_NAME);
+  const appPb = new PocketBase(process.env.VITE_POCKETBASE_APP_DB_URL);
+  const testPb = new PocketBase(process.env.TEST_DB_URL);
 
-  const appPb = new PocketBase("http://127.0.0.1:8090");
-  const testPb = new PocketBase("http://127.0.0.1:8091");
-
-  await appPb.collection("_superusers").authWithPassword("admin@admin.com", "admin@admin.com");
-  await testPb.collection("_superusers").authWithPassword("admin@admin.com", "admin@admin.com");
+  await appPb
+    .collection("_superusers")
+    .authWithPassword(process.env.TEST_DB_USERNAME, process.env.TEST_DB_PASSWORD);
+  await testPb
+    .collection("_superusers")
+    .authWithPassword(process.env.TEST_DB_USERNAME, process.env.TEST_DB_PASSWORD);
 
   await deleteSeed(appPb, process.env.TEST_SEED_FILE_NAME);
   await deleteSeed(testPb, process.env.TEST_SEED_FILE_NAME);
