@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 /* eslint-disable @typescript-eslint/no-require-imports */
+import "dotenv/config";
 import PocketBase from "pocketbase";
 import fse from "fs-extra";
 
@@ -59,18 +60,22 @@ const restoreSeed = async (pb, seedName) => {
 };
 
 const main = async () => {
+  console.log(process.env.TEST_SEED_FILE_NAME);
+
   const appPb = new PocketBase("http://127.0.0.1:8090");
   const testPb = new PocketBase("http://127.0.0.1:8091");
 
   await appPb.collection("_superusers").authWithPassword("admin@admin.com", "admin@admin.com");
   await testPb.collection("_superusers").authWithPassword("admin@admin.com", "admin@admin.com");
 
-  await deleteSeed(appPb, "seed.zip");
-  await deleteSeed(testPb, "seed.zip");
+  await deleteSeed(appPb, process.env.TEST_SEED_FILE_NAME);
+  await deleteSeed(testPb, process.env.TEST_SEED_FILE_NAME);
 
-  await createSeed(appPb, "seed.zip");
+  await createSeed(appPb, process.env.TEST_SEED_FILE_NAME);
 
-  const getFileAsBlobResponse = await getFileAsBlobIfExists(`${appDbBackupsBasePath}/seed.zip`);
+  const getFileAsBlobResponse = await getFileAsBlobIfExists(
+    `${appDbBackupsBasePath}/${process.env.TEST_SEED_FILE_NAME}`,
+  );
 
   if (!getFileAsBlobResponse.success) {
     console.error(`test-db-restore-app-db-seed.mjs:${/*LL*/ 81}`, getFileAsBlobResponse.error);
@@ -79,6 +84,6 @@ const main = async () => {
 
   await uploadSeed(testPb, getFileAsBlobResponse.blob);
 
-  await restoreSeed(testPb, "seed.zip");
+  await restoreSeed(testPb, process.env.TEST_SEED_FILE_NAME);
 };
 main();
