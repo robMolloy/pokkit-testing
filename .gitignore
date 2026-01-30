@@ -23,9 +23,11 @@ dist-ssr
 *.sln
 *.sw?
 
-pocketbase/app-db/pb_data/*
-pocketbase/app-db/pb_migrations/*
-!pocketbase/app-db/pb_data/backups
+pocketbase/app-db/pb_data/*.*
+pocketbase/app-db/pb_data/logs/
+pocketbase/app-db/pb_data/storage/
+pocketbase/app-db/pb_data/backups/*_test.zip
+pocketbase/app-db/pb_data/backups/*_test.zip*
 
 pocketbase/test-db/*
 !pocketbase/test-db/pocketbase
