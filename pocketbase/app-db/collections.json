@@ -581,7 +581,7 @@
   {
     "id": "_pb_users_auth_",
     "listRule": "@request.auth.id = id ||\n@collection.globalUserPermissions.userId ?= @request.auth.id &&\n@collection.globalUserPermissions.role = \"admin\"",
-    "viewRule": "id = @request.auth.id",
+    "viewRule": "@request.auth.id = id ||\n@collection.globalUserPermissions.userId ?= @request.auth.id &&\n@collection.globalUserPermissions.role = \"admin\"",
     "createRule": "",
     "updateRule": "id = @request.auth.id",
     "deleteRule": "id = @request.auth.id",
@@ -718,7 +718,7 @@
       "CREATE UNIQUE INDEX `idx_email__pb_users_auth_` ON `users` (`email`) WHERE `email` != ''"
     ],
     "created": "2026-01-25 00:57:26.152Z",
-    "updated": "2026-01-25 00:57:26.174Z",
+    "updated": "2026-01-30 23:54:33.769Z",
     "system": false,
     "authRule": "",
     "manageRule": null,
@@ -789,8 +789,8 @@
   },
   {
     "id": "pbc_2680520508",
-    "listRule": "userId=@request.auth.id",
-    "viewRule": "@request.auth.id=id",
+    "listRule": "@request.auth.id=id || @collection.globalUserPermissions.id ?= @request.auth.id &&\n@collection.globalUserPermissions.role = \"admin\"",
+    "viewRule": "\n  @request.auth.id = userId || \n  @collection.globalUserPermissions.userId ?= @request.auth.id && \n  @collection.globalUserPermissions.role ?= \"admin\"\n",
     "createRule": null,
     "updateRule": null,
     "deleteRule": null,
@@ -876,7 +876,7 @@
     ],
     "indexes": [],
     "created": "2026-01-25 00:57:26.161Z",
-    "updated": "2026-01-25 23:12:32.160Z",
+    "updated": "2026-01-31 02:24:53.539Z",
     "system": false
   }
 ]
