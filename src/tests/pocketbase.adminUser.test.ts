@@ -7,6 +7,7 @@ import {
   superusersCollectionName,
   usersCollectionName,
 } from "./helpers/pocketbaseMetadata";
+import { parsedEnv } from "./helpers/testEnvHelpers";
 
 describe("PocketBase admin users collection rules", () => {
   beforeEach(async () => {
@@ -32,7 +33,7 @@ describe("PocketBase admin users collection rules", () => {
 
     await superuserPb
       .collection(superusersCollectionName)
-      .authWithPassword("admin@admin.com", "admin@admin.com");
+      .authWithPassword(parsedEnv.TEST_DB_USERNAME, parsedEnv.TEST_DB_PASSWORD);
 
     const createdGlobalUserPermissionsRecord = await superuserPb
       .collection(globalUserPermissionsCollectionName)
