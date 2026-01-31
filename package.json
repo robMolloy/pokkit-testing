@@ -29,6 +29,7 @@
     "vitest": "^4.0.18"
   },
   "dependencies": {
-    "pocketbase": "^0.26.6"
+    "pocketbase": "^0.26.6",
+    "zod": "^4.3.6"
   }
 }
