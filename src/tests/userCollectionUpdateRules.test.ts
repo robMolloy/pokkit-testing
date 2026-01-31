@@ -1,9 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { userPb } from "../config/pocketbaseConfig";
-import {
-  globalUserPermissionsCollectionName,
-  usersCollectionName,
-} from "./helpers/pocketbaseMetadata";
+import { usersCollectionName } from "./helpers/pocketbaseMetadata";
 import { clearDatabase } from "./helpers/pocketbaseTestHelpers";
 import { createUserEmailPasswordData, createUserRecord } from "./helpers/pocketbaseUserHelpers";
 
