@@ -793,7 +793,7 @@
     "viewRule": "@request.auth.id != \"\" && @request.auth.id = id || @collection.globalUserPermissions.id ?= @request.auth.id && @collection.globalUserPermissions.role ?= \"admin\"",
     "createRule": "@request.auth.id != \"\" && \n@collection.globalUserPermissions.id ?= @request.auth.id && \n@collection.globalUserPermissions.role ?= \"admin\"",
     "updateRule": "@request.auth.id != \"\" && \n@collection.globalUserPermissions.id ?= @request.auth.id && \n@collection.globalUserPermissions.role ?= \"admin\"",
-    "deleteRule": null,
+    "deleteRule": "@request.auth.id != \"\" && \n@collection.globalUserPermissions.id ?= @request.auth.id && \n@collection.globalUserPermissions.role ?= \"admin\"",
     "name": "globalUserPermissions",
     "type": "base",
     "fields": [
@@ -876,7 +876,7 @@
     ],
     "indexes": [],
     "created": "2026-01-25 00:57:26.161Z",
-    "updated": "2026-02-05 22:14:10.942Z",
+    "updated": "2026-02-05 22:33:23.038Z",
     "system": false
   }
 ]
