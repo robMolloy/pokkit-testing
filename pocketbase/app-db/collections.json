@@ -791,7 +791,7 @@
     "id": "pbc_2680520508",
     "listRule": "@request.auth.id != \"\" && (\n  @request.auth.id = id || \n  @collection.globalUserPermissions.id ?= @request.auth.id && @collection.globalUserPermissions.role ?= \"admin\"\n)",
     "viewRule": "@request.auth.id != \"\" && @request.auth.id = id || @collection.globalUserPermissions.id ?= @request.auth.id && @collection.globalUserPermissions.role ?= \"admin\"",
-    "createRule": null,
+    "createRule": "@request.auth.id != \"\" && \n@collection.globalUserPermissions.id ?= @request.auth.id && \n@collection.globalUserPermissions.role ?= \"admin\"",
     "updateRule": null,
     "deleteRule": null,
     "name": "globalUserPermissions",
@@ -876,7 +876,7 @@
     ],
     "indexes": [],
     "created": "2026-01-25 00:57:26.161Z",
-    "updated": "2026-02-05 21:51:49.554Z",
+    "updated": "2026-02-05 21:58:02.027Z",
     "system": false
   }
 ]
