@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { superuserPb, userPb } from "../config/pocketbaseConfig";
+import { superuserPb, userPb } from "../../config/pocketbaseConfig";
 import {
   globalUserPermissionsCollectionName,
   superusersCollectionName,
   usersCollectionName,
-} from "./helpers/pocketbaseMetadata";
-import { clearDatabase } from "./helpers/pocketbaseTestHelpers";
-import { createUserEmailPasswordData, createUserRecord } from "./helpers/pocketbaseUserHelpers";
-import { createGlobalUserPermissionRecordSeedData } from "./helpers/globalUserPermissionHelpers";
+} from "../helpers/pocketbaseMetadata";
+import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
+import { createUserEmailPasswordData, createUserRecord } from "../helpers/pocketbaseUserHelpers";
+import { createGlobalUserPermissionRecordSeedData } from "../helpers/globalUserPermissionHelpers";
 
 // @request.auth.id != "" && @request.auth.id = id || @collection.globalUserPermissions.id ?= @request.auth.id && @collection.globalUserPermissions.role ?= "admin"
 // Standard: @request.auth.id != "" && @request.auth.id = id
@@ -18,59 +18,60 @@ describe(`PocketBase globalUserPermissions collection view rules as standard use
     await clearDatabase();
   });
 
-  it("allows user to get empty list if own globalUserPermissions record if missing", async () => {
+  it("denies user to view own globalUserPermissions record if missing", async () => {
     // throwaway record - first user gains an approved admin global permission
     await createUserRecord({ pb: userPb });
-
-    const user1Data = createUserEmailPasswordData();
-    await userPb.collection(usersCollectionName).create({
-      email: user1Data.email,
-      password: user1Data.password,
-      passwordConfirm: user1Data.password,
+    const userData = createUserEmailPasswordData();
+    const userDataRecord = await userPb.collection(usersCollectionName).create({
+      email: userData.email,
+      password: userData.password,
+      passwordConfirm: userData.password,
     });
 
     await userPb
       .collection(usersCollectionName)
-      .authWithPassword(user1Data.email, user1Data.password);
+      .authWithPassword(userData.email, userData.password);
 
-    const userGlobalPermissionrecords = await userPb
-      .collection(globalUserPermissionsCollectionName)
-      .getFullList();
-    await expect(userGlobalPermissionrecords.length).toBe(0);
+    await expect(
+      userPb.collection(globalUserPermissionsCollectionName).getOne(userDataRecord.id),
+    ).rejects.toThrow();
   });
 
-  it("allows user to list own globalUserPermissions record if exists", async () => {
+  it("allows user to view own globalUserPermissions record if exists", async () => {
     // throwaway record - first user gains an approved admin global permission
     await createUserRecord({ pb: userPb });
 
-    const user1Data = createUserEmailPasswordData();
-    const user1Record = await userPb.collection(usersCollectionName).create({
-      email: user1Data.email,
-      password: user1Data.password,
-      passwordConfirm: user1Data.password,
+    const userData = createUserEmailPasswordData();
+    const userDataRecord = await userPb.collection(usersCollectionName).create({
+      email: userData.email,
+      password: userData.password,
+      passwordConfirm: userData.password,
     });
 
-    // login as superuser to create globalUserPermission record for user1
     await superuserPb
       .collection(superusersCollectionName)
       .authWithPassword("admin@admin.com", "admin@admin.com");
+
     await superuserPb.collection(globalUserPermissionsCollectionName).create({
-      id: user1Record.id,
-      userId: user1Record.id,
+      id: userDataRecord.id,
+      userId: userDataRecord.id,
       ...createGlobalUserPermissionRecordSeedData(),
     });
 
     await userPb
       .collection(usersCollectionName)
-      .authWithPassword(user1Data.email, user1Data.password);
+      .authWithPassword(userData.email, userData.password);
 
-    const userGlobalPermissionrecords = await userPb
+    const userGlobalPermission = await userPb
       .collection(globalUserPermissionsCollectionName)
-      .getFullList();
-    await expect(userGlobalPermissionrecords.length).toBe(1);
-  });
+      .getOne(userDataRecord.id);
 
-  it("allows user to list globalUserPermission records but filters out any that are not their own", async () => {
+    expect(userGlobalPermission.id).toBe(userDataRecord.id);
+    expect(userGlobalPermission.role).toBe("standard");
+    expect(userGlobalPermission.status).toBe("approved");
+    expect(userGlobalPermission.userId).toBe(userDataRecord.id);
+  });
+  it("denies user to view other user's globalUserPermissions", async () => {
     // throwaway record - first user gains an approved admin global permission
     await createUserRecord({ pb: userPb });
 
@@ -102,14 +103,13 @@ describe(`PocketBase globalUserPermissions collection view rules as standard use
       .collection(usersCollectionName)
       .authWithPassword(user1Data.email, user1Data.password);
 
-    // attempt to get all globalUserPermission records does not return user2's record
-    const userGlobalPermissionrecords = await userPb
-      .collection(globalUserPermissionsCollectionName)
-      .getFullList();
-    await expect(userGlobalPermissionrecords.length).toBe(0);
+    // attempt to get user2's globalUserPermission record
+    await expect(
+      userPb.collection(globalUserPermissionsCollectionName).getOne(user2Record.id),
+    ).rejects.toThrow();
   });
 
-  it("allows logged out user to return an empty list of globalUserPermission records", async () => {
+  it("denies logged out user to view a user's globalUserPermissions", async () => {
     // throwaway record - first user gains an approved admin global permission
     await createUserRecord({ pb: userPb });
 
@@ -131,10 +131,9 @@ describe(`PocketBase globalUserPermissions collection view rules as standard use
     });
 
     // attempt to get user2's globalUserPermission record
-    const userGlobalPermissionrecords = await userPb
-      .collection(globalUserPermissionsCollectionName)
-      .getFullList();
-    await expect(userGlobalPermissionrecords.length).toBe(0);
+    await expect(
+      userPb.collection(globalUserPermissionsCollectionName).getOne(user1Record.id),
+    ).rejects.toThrow();
   });
 });
 
@@ -143,7 +142,7 @@ describe(`PocketBase user collection view rules as admin user`, () => {
     await clearDatabase();
   });
 
-  it("allows admin user to list any globalUserPermissions record if exists", async () => {
+  it("allows admin user to view any globalUserPermissions record if exists", async () => {
     // throwaway record - first user gains an approved admin global permission
     await createUserRecord({ pb: userPb });
 
@@ -191,9 +190,24 @@ describe(`PocketBase user collection view rules as admin user`, () => {
       .collection(usersCollectionName)
       .authWithPassword(adminUserSeed.email, adminUserSeed.password);
 
-    const globalPermissionRecords = await userPb
+    await superuserPb.collection(globalUserPermissionsCollectionName).getOne(user1Record.id);
+
+    const user1GlobalPermissionRecord = await userPb
       .collection(globalUserPermissionsCollectionName)
-      .getFullList();
-    expect(globalPermissionRecords.length).toBe(4);
+      .getOne(user1Record.id);
+    expect(user1GlobalPermissionRecord.id).toBe(user1Record.id);
+    expect(user1GlobalPermissionRecord.userId).toBe(user1Record.id);
+
+    const user2GlobalPermissionRecord = await userPb
+      .collection(globalUserPermissionsCollectionName)
+      .getOne(user2Record.id);
+    expect(user2GlobalPermissionRecord.id).toBe(user2Record.id);
+    expect(user2GlobalPermissionRecord.userId).toBe(user2Record.id);
+
+    const adminUserGlobalPermissionRecord = await userPb
+      .collection(globalUserPermissionsCollectionName)
+      .getOne(adminUserRecord.id);
+    expect(adminUserGlobalPermissionRecord.id).toBe(adminUserRecord.id);
+    expect(adminUserGlobalPermissionRecord.userId).toBe(adminUserRecord.id);
   });
 });

@@ -1,24 +1,24 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { superuserPb, userPb } from "../config/pocketbaseConfig";
+import { superuserPb, userPb } from "../../config/pocketbaseConfig";
 import {
   globalUserPermissionsCollectionName,
   superusersCollectionName,
   usersCollectionName,
-} from "./helpers/pocketbaseMetadata";
-import { clearDatabase } from "./helpers/pocketbaseTestHelpers";
-import { createUserEmailPasswordData, createUserRecord } from "./helpers/pocketbaseUserHelpers";
-import { createGlobalUserPermissionRecordSeedData } from "./helpers/globalUserPermissionHelpers";
+} from "../helpers/pocketbaseMetadata";
+import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
+import { createUserEmailPasswordData, createUserRecord } from "../helpers/pocketbaseUserHelpers";
+import { createGlobalUserPermissionRecordSeedData } from "../helpers/globalUserPermissionHelpers";
 
 // @request.auth.id != "" && @request.auth.id = id || @collection.globalUserPermissions.id ?= @request.auth.id && @collection.globalUserPermissions.role ?= "admin"
 // Standard: @request.auth.id != "" && @request.auth.id = id
 // Admin:    @collection.globalUserPermissions.id ?= @request.auth.id && @collection.globalUserPermissions.role ?= "admin"
 
-describe(`PocketBase globalUserPermissions collection delete rules as standard user`, () => {
+describe(`PocketBase globalUserPermissions collection view rules as standard user`, () => {
   beforeEach(async () => {
     await clearDatabase();
   });
 
-  it("denies standard user to delete a globalUserPermissions record for an existing user if the user has a non admin globalPermissionRecord", async () => {
+  it("denies standard user to create a globalUserPermissions record for an existing user if the user has a non admin globalPermissionRecord", async () => {
     // throwaway record - first user gains an approved admin global permission
     await createUserRecord({ pb: userPb });
 
@@ -56,15 +56,23 @@ describe(`PocketBase globalUserPermissions collection delete rules as standard u
       .authWithPassword(user3Seed.email, user3Seed.password);
 
     await expect(
-      userPb.collection(globalUserPermissionsCollectionName).delete(user1Record.id),
+      userPb.collection(globalUserPermissionsCollectionName).create({
+        id: user1Record.id,
+        userId: user1Record.id,
+        ...createGlobalUserPermissionRecordSeedData({ role: "admin" }),
+      }),
     ).rejects.toThrow();
 
     await expect(
-      userPb.collection(globalUserPermissionsCollectionName).delete(user2Record.id),
+      userPb.collection(globalUserPermissionsCollectionName).create({
+        id: user2Record.id,
+        userId: user2Record.id,
+        ...createGlobalUserPermissionRecordSeedData(),
+      }),
     ).rejects.toThrow();
   });
 
-  it("denies standard user to delete a globalUserPermissions record for an existing user if the user is missing a globalPermission record", async () => {
+  it("denies standard user to create a globalUserPermissions record for an existing user if the user is missing a globalPermission record", async () => {
     // throwaway record - first user gains an approved admin global permission
     await createUserRecord({ pb: userPb });
 
@@ -92,21 +100,29 @@ describe(`PocketBase globalUserPermissions collection delete rules as standard u
       .authWithPassword(user3Seed.email, user3Seed.password);
 
     await expect(
-      userPb.collection(globalUserPermissionsCollectionName).delete(user1Record.id),
+      userPb.collection(globalUserPermissionsCollectionName).create({
+        id: user1Record.id,
+        userId: user1Record.id,
+        ...createGlobalUserPermissionRecordSeedData({ role: "admin" }),
+      }),
     ).rejects.toThrow();
 
     await expect(
-      userPb.collection(globalUserPermissionsCollectionName).delete(user2Record.id),
+      userPb.collection(globalUserPermissionsCollectionName).create({
+        id: user2Record.id,
+        userId: user2Record.id,
+        ...createGlobalUserPermissionRecordSeedData(),
+      }),
     ).rejects.toThrow();
   });
 });
 
-describe(`PocketBase user collection delete rules as admin user`, () => {
+describe(`PocketBase user collection view rules as admin user`, () => {
   beforeEach(async () => {
     await clearDatabase();
   });
 
-  it("allows admin user to delete a globalUserPermissions record for an existing user", async () => {
+  it("allows admin user to create a globalUserPermissions record for an existing user", async () => {
     // throwaway record - first user gains an approved admin global permission
     await createUserRecord({ pb: userPb });
 
@@ -122,18 +138,11 @@ describe(`PocketBase user collection delete rules as admin user`, () => {
       password: user2Seed.password,
       passwordConfirm: user2Seed.password,
     });
-    const adminUser1Seed = createUserEmailPasswordData();
-    const adminUser1Record = await userPb.collection(usersCollectionName).create({
-      email: adminUser1Seed.email,
-      password: adminUser1Seed.password,
-      passwordConfirm: adminUser1Seed.password,
-    });
-
-    const adminUser2Seed = createUserEmailPasswordData();
-    const adminUser2Record = await userPb.collection(usersCollectionName).create({
-      email: adminUser2Seed.email,
-      password: adminUser2Seed.password,
-      passwordConfirm: adminUser2Seed.password,
+    const adminUserSeed = createUserEmailPasswordData();
+    const adminUserRecord = await userPb.collection(usersCollectionName).create({
+      email: adminUserSeed.email,
+      password: adminUserSeed.password,
+      passwordConfirm: adminUserSeed.password,
     });
 
     await superuserPb
@@ -141,32 +150,25 @@ describe(`PocketBase user collection delete rules as admin user`, () => {
       .authWithPassword("admin@admin.com", "admin@admin.com");
 
     await superuserPb.collection(globalUserPermissionsCollectionName).create({
-      id: user1Record.id,
-      userId: user1Record.id,
-      ...createGlobalUserPermissionRecordSeedData(),
-    });
-    await superuserPb.collection(globalUserPermissionsCollectionName).create({
-      id: user2Record.id,
-      userId: user2Record.id,
-      ...createGlobalUserPermissionRecordSeedData(),
-    });
-    await superuserPb.collection(globalUserPermissionsCollectionName).create({
-      id: adminUser1Record.id,
-      userId: adminUser1Record.id,
-      ...createGlobalUserPermissionRecordSeedData({ role: "admin" }),
-    });
-    await superuserPb.collection(globalUserPermissionsCollectionName).create({
-      id: adminUser2Record.id,
-      userId: adminUser2Record.id,
+      id: adminUserRecord.id,
+      userId: adminUserRecord.id,
       ...createGlobalUserPermissionRecordSeedData({ role: "admin" }),
     });
 
     await userPb
       .collection(usersCollectionName)
-      .authWithPassword(adminUser1Seed.email, adminUser1Seed.password);
+      .authWithPassword(adminUserSeed.email, adminUserSeed.password);
 
-    await userPb.collection(globalUserPermissionsCollectionName).delete(user1Record.id);
-    await userPb.collection(globalUserPermissionsCollectionName).delete(user2Record.id);
-    await userPb.collection(globalUserPermissionsCollectionName).delete(adminUser2Record.id);
+    await userPb.collection(globalUserPermissionsCollectionName).create({
+      id: user1Record.id,
+      userId: user1Record.id,
+      ...createGlobalUserPermissionRecordSeedData({ role: "admin" }),
+    });
+
+    await superuserPb.collection(globalUserPermissionsCollectionName).create({
+      id: user2Record.id,
+      userId: user2Record.id,
+      ...createGlobalUserPermissionRecordSeedData(),
+    });
   });
 });

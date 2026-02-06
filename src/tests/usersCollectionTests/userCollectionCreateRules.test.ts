@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { userPb } from "../config/pocketbaseConfig";
-import { usersCollectionName } from "./helpers/pocketbaseMetadata";
-import { clearDatabase } from "./helpers/pocketbaseTestHelpers";
-import { createUserEmailPasswordData } from "./helpers/pocketbaseUserHelpers";
+import { userPb } from "../../config/pocketbaseConfig";
+import { usersCollectionName } from "../helpers/pocketbaseMetadata";
+import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
+import { createUserEmailPasswordData } from "../helpers/pocketbaseUserHelpers";
 
 // NO RULES - IT'S A FREE FOR ALL!!!
 //

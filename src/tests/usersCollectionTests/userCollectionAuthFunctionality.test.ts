@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { userPb } from "../config/pocketbaseConfig";
-import { usersCollectionName } from "./helpers/pocketbaseMetadata";
-import { clearDatabase } from "./helpers/pocketbaseTestHelpers";
-import { createUserEmailPasswordData } from "./helpers/pocketbaseUserHelpers";
+import { userPb } from "../../config/pocketbaseConfig";
+import { usersCollectionName } from "../helpers/pocketbaseMetadata";
+import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
+import { createUserEmailPasswordData } from "../helpers/pocketbaseUserHelpers";
 
 describe(`PocketBase user collection view rules as standard user`, () => {
   beforeEach(async () => {

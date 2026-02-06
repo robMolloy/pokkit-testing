@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { userPb } from "../config/pocketbaseConfig";
-import { usersCollectionName } from "./helpers/pocketbaseMetadata";
-import { clearDatabase } from "./helpers/pocketbaseTestHelpers";
-import { createUserEmailPasswordData, createUserRecord } from "./helpers/pocketbaseUserHelpers";
+import { userPb } from "../../config/pocketbaseConfig";
+import { usersCollectionName } from "../helpers/pocketbaseMetadata";
+import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
+import { createUserEmailPasswordData, createUserRecord } from "../helpers/pocketbaseUserHelpers";
 
 // id = @request.auth.id
 

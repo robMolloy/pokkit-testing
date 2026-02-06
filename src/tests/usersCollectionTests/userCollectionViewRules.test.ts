@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { userPb } from "../config/pocketbaseConfig";
+import { userPb } from "../../config/pocketbaseConfig";
 import {
   globalUserPermissionsCollectionName,
   usersCollectionName,
-} from "./helpers/pocketbaseMetadata";
-import { clearDatabase } from "./helpers/pocketbaseTestHelpers";
-import { createUserEmailPasswordData, createUserRecord } from "./helpers/pocketbaseUserHelpers";
+} from "../helpers/pocketbaseMetadata";
+import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
+import { createUserEmailPasswordData, createUserRecord } from "../helpers/pocketbaseUserHelpers";
 
 // @request.auth.id = id || @collection.globalUserPermissions.userId ?= @request.auth.id && @collection.globalUserPermissions.role = "admin"
 // Standard: @request.auth.id = id
