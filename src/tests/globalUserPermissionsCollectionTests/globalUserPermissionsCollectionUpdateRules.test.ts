@@ -9,7 +9,7 @@ import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
 import { createUserEmailPasswordData, createUserRecord } from "../helpers/pocketbaseUserHelpers";
 import { createGlobalUserPermissionRecordSeedData } from "../helpers/globalUserPermissionHelpers";
 
-// @request.auth.id != "" && @request.auth.id = id || @collection.globalUserPermissions.id ?= @request.auth.id && @collection.globalUserPermissions.role ?= "admin"
+// updateRule: @request.auth.id != "" && @collection.globalUserPermissions.id ?= @request.auth.id && @collection.globalUserPermissions.role ?= "admin"
 // Standard: @request.auth.id != "" && @request.auth.id = id
 // Admin:    @collection.globalUserPermissions.id ?= @request.auth.id && @collection.globalUserPermissions.role ?= "admin"
 
