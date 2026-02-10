@@ -13,7 +13,7 @@ import { createGlobalUserPermissionRecordSeedData } from "../helpers/globalUserP
 // Standard: @request.auth.id != "" && @request.auth.id = id
 // Admin:    @collection.globalUserPermissions.id ?= @request.auth.id && @collection.globalUserPermissions.role ?= "admin"
 
-describe(`PocketBase globalUserPermissions collection view rules as standard user`, () => {
+describe(`PocketBase globalUserPermissions collection create rules as standard user`, () => {
   beforeEach(async () => {
     await clearDatabase();
   });
