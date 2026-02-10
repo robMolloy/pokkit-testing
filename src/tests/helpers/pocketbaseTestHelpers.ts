@@ -8,7 +8,7 @@ const execAsync = promisify(exec);
 
 export async function clearDatabase() {
   await execAsync(
-    `./pocketbase/test-db/pocketbase_${process.platform} superuser upsert ${parsedEnv.TEST_DB_USERNAME} ${parsedEnv.TEST_DB_PASSWORD}`,
+    `./pocketbase/test-db/pocketbase_${process.platform}_${process.arch}${process.platform === "win32" ? ".exe" : ""} superuser upsert ${parsedEnv.TEST_DB_USERNAME} ${parsedEnv.TEST_DB_PASSWORD}`,
   );
 
   await superuserPb
