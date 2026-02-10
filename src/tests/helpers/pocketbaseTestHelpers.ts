@@ -8,7 +8,7 @@ const execAsync = promisify(exec);
 
 export async function clearDatabase() {
   await execAsync(
-    `./pocketbase/test-db/pocketbase superuser upsert ${parsedEnv.TEST_DB_USERNAME} ${parsedEnv.TEST_DB_PASSWORD}`,
+    `./pocketbase/test-db/pocketbase_${process.platform} superuser upsert ${parsedEnv.TEST_DB_USERNAME} ${parsedEnv.TEST_DB_PASSWORD}`,
   );
 
   await superuserPb
@@ -16,18 +16,16 @@ export async function clearDatabase() {
     .authWithPassword(parsedEnv.TEST_DB_USERNAME, parsedEnv.TEST_DB_PASSWORD);
 
   const collections = await superuserPb.collections.getFullList();
-  const nonSuperuserCollections = collections.filter(
-    (coll) => coll.name !== superusersCollectionName,
-  );
-  for (const coll of nonSuperuserCollections) {
-    await superuserPb.collections.truncate(coll.name);
-  }
+  const truncationPromises = collections
+    .filter((coll) => coll.name !== superusersCollectionName)
+    .map((coll) => superuserPb.collections.truncate(coll.name));
+  await Promise.all(truncationPromises);
 
   const superuserRecords = await superuserPb.collection(superusersCollectionName).getFullList();
-  for (const record of superuserRecords) {
-    if (record.email !== parsedEnv.TEST_DB_USERNAME)
-      await superuserPb.collection(superusersCollectionName).delete(record.id);
-  }
+  superuserRecords
+    .filter((record) => record.email !== parsedEnv.TEST_DB_USERNAME)
+    .map((record) => superuserPb.collection(superusersCollectionName).delete(record.id));
+  await Promise.all(truncationPromises);
 
   superuserPb.authStore.clear();
   userPb.authStore.clear();

@@ -718,7 +718,7 @@
       "CREATE UNIQUE INDEX `idx_email__pb_users_auth_` ON `users` (`email`) WHERE `email` != ''"
     ],
     "created": "2026-01-25 00:57:26.152Z",
-    "updated": "2026-01-30 23:54:33.769Z",
+    "updated": "2026-02-09 13:32:08.377Z",
     "system": false,
     "authRule": "",
     "manageRule": null,
@@ -876,7 +876,7 @@
     ],
     "indexes": [],
     "created": "2026-01-25 00:57:26.161Z",
-    "updated": "2026-02-05 22:33:23.038Z",
+    "updated": "2026-02-09 13:32:08.427Z",
     "system": false
   }
 ]
