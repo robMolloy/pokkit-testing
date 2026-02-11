@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { superuserPb, userPb } from "../../config/pocketbaseConfig";
 import { createOrganisationRecordSeedData } from "../helpers/organisationsCollectionHelpers";
 import {
+  globalUserPermissionsCollectionName,
   organisationsCollectionName,
   organisationUserPermissionsCollectionName,
   superusersCollectionName,
@@ -10,6 +11,7 @@ import {
 import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
 import { createUserEmailPasswordData } from "../helpers/pocketbaseUserHelpers";
 import { organisationUserPermissionSeedFactory } from "../helpers/organisationUserPermissionHelpers";
+import { parsedEnv } from "../helpers/testEnvHelpers";
 
 // createRule: @request.auth.id != "" && @collection.globalUserPermissions.id ?= @request.auth.id && @collection.globalUserPermissions.role ?= "admin"
 // Standard: @request.auth.id != "" && @request.auth.id = id
@@ -120,18 +122,24 @@ describe(`PocketBase organisations collection update rules as admin user`, () =>
     await clearDatabase();
   });
 
-  it("allows organisation admin orgPermission user to update an organisation record", async () => {
+  it(`allows user to update an organisation record if;
+    - admin orgPermission 
+    - standard/admin/no globalPermission`, async () => {
+    await superuserPb
+      .collection(superusersCollectionName)
+      .authWithPassword(parsedEnv.TEST_DB_USERNAME, parsedEnv.TEST_DB_PASSWORD);
+
     // first user gains an approved admin global permission
-    const adminUserSeed = createUserEmailPasswordData();
-    await userPb.collection(usersCollectionName).create({
-      email: adminUserSeed.email,
-      password: adminUserSeed.password,
-      passwordConfirm: adminUserSeed.password,
+    const globalAdminUserSeed = createUserEmailPasswordData();
+    const globalAdminUserRecord = await userPb.collection(usersCollectionName).create({
+      email: globalAdminUserSeed.email,
+      password: globalAdminUserSeed.password,
+      passwordConfirm: globalAdminUserSeed.password,
     });
 
     await userPb
       .collection(usersCollectionName)
-      .authWithPassword(adminUserSeed.email, adminUserSeed.password);
+      .authWithPassword(globalAdminUserSeed.email, globalAdminUserSeed.password);
 
     // creator user gains an approved admin organisation permission
     const organisationSeedData = createOrganisationRecordSeedData();
@@ -139,10 +147,29 @@ describe(`PocketBase organisations collection update rules as admin user`, () =>
       .collection(organisationsCollectionName)
       .create(organisationSeedData);
 
-    const updatedOrganisationRecord = await userPb
+    const updatedOrganisationRecord1 = await userPb
       .collection(organisationsCollectionName)
       .update(organisationRecord.id, { name: "Updated Organisation Name" });
+    expect(updatedOrganisationRecord1.name).toBe("Updated Organisation Name");
 
-    expect(updatedOrganisationRecord.name).toBe("Updated Organisation Name");
+    await superuserPb
+      .collection(globalUserPermissionsCollectionName)
+      .update(globalAdminUserRecord.id, { role: "standard" });
+
+    const updatedOrganisationRecord2 = await userPb
+      .collection(organisationsCollectionName)
+      .update(organisationRecord.id, { name: "Updated Organisation2 Name" });
+
+    expect(updatedOrganisationRecord2.name).toBe("Updated Organisation2 Name");
+
+    await superuserPb
+      .collection(globalUserPermissionsCollectionName)
+      .delete(globalAdminUserRecord.id);
+
+    const updatedOrganisationRecord3 = await userPb
+      .collection(organisationsCollectionName)
+      .update(organisationRecord.id, { name: "Updated Organisation3 Name" });
+
+    expect(updatedOrganisationRecord3.name).toBe("Updated Organisation3 Name");
   });
 });
