@@ -884,7 +884,7 @@
     "listRule": null,
     "viewRule": null,
     "createRule": "@request.auth.id != \"\" && \n@collection.globalUserPermissions.userId ?= @request.auth.id && \n@collection.globalUserPermissions.role = \"admin\"",
-    "updateRule": null,
+    "updateRule": "@request.auth.id != \"\" && \n@collection.organisationUserPermissions.userId ?= @request.auth.id && \n@collection.organisationUserPermissions.organisationId ?= id && \n@collection.organisationUserPermissions.role = \"admin\"",
     "deleteRule": null,
     "name": "organisations",
     "type": "base",
@@ -932,6 +932,19 @@
         "type": "text"
       },
       {
+        "cascadeDelete": false,
+        "collectionId": "_pb_users_auth_",
+        "hidden": false,
+        "id": "relation2542835043",
+        "maxSelect": 1,
+        "minSelect": 0,
+        "name": "createdByUserId",
+        "presentable": false,
+        "required": false,
+        "system": false,
+        "type": "relation"
+      },
+      {
         "hidden": false,
         "id": "autodate2990389176",
         "name": "created",
@@ -954,16 +967,16 @@
     ],
     "indexes": [],
     "created": "2026-02-10 15:36:44.903Z",
-    "updated": "2026-02-10 16:38:43.714Z",
+    "updated": "2026-02-11 09:08:16.064Z",
     "system": false
   },
   {
     "id": "pbc_230240349",
-    "listRule": null,
-    "viewRule": null,
-    "createRule": null,
-    "updateRule": null,
-    "deleteRule": null,
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "",
+    "updateRule": "",
+    "deleteRule": "",
     "name": "organisationUserPermissions",
     "type": "base",
     "fields": [
@@ -988,7 +1001,7 @@
         "id": "relation982184766",
         "maxSelect": 1,
         "minSelect": 0,
-        "name": "orgId",
+        "name": "organisationId",
         "presentable": false,
         "required": false,
         "system": false,
@@ -1075,7 +1088,7 @@
       "CREATE UNIQUE INDEX `idx_0UWlVOdDqD` ON `organisationUserPermissions` (`userOrgKey`)"
     ],
     "created": "2026-02-10 15:36:44.907Z",
-    "updated": "2026-02-10 15:36:44.907Z",
+    "updated": "2026-02-11 09:19:23.015Z",
     "system": false
   }
 ]
