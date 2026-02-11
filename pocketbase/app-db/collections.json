@@ -932,19 +932,6 @@
         "type": "text"
       },
       {
-        "cascadeDelete": false,
-        "collectionId": "_pb_users_auth_",
-        "hidden": false,
-        "id": "relation2542835043",
-        "maxSelect": 1,
-        "minSelect": 0,
-        "name": "createdByUserId",
-        "presentable": false,
-        "required": false,
-        "system": false,
-        "type": "relation"
-      },
-      {
         "hidden": false,
         "id": "autodate2990389176",
         "name": "created",
@@ -967,16 +954,16 @@
     ],
     "indexes": [],
     "created": "2026-02-10 15:36:44.903Z",
-    "updated": "2026-02-11 09:08:16.064Z",
+    "updated": "2026-02-11 10:05:05.748Z",
     "system": false
   },
   {
     "id": "pbc_230240349",
-    "listRule": "",
-    "viewRule": "",
-    "createRule": "",
-    "updateRule": "",
-    "deleteRule": "",
+    "listRule": null,
+    "viewRule": null,
+    "createRule": null,
+    "updateRule": null,
+    "deleteRule": null,
     "name": "organisationUserPermissions",
     "type": "base",
     "fields": [
@@ -995,7 +982,7 @@
         "type": "text"
       },
       {
-        "cascadeDelete": false,
+        "cascadeDelete": true,
         "collectionId": "pbc_1053844701",
         "hidden": false,
         "id": "relation982184766",
@@ -1003,7 +990,7 @@
         "minSelect": 0,
         "name": "organisationId",
         "presentable": false,
-        "required": false,
+        "required": true,
         "system": false,
         "type": "relation"
       },
@@ -1037,7 +1024,7 @@
         ]
       },
       {
-        "cascadeDelete": false,
+        "cascadeDelete": true,
         "collectionId": "_pb_users_auth_",
         "hidden": false,
         "id": "relation1689669068",
@@ -1045,7 +1032,7 @@
         "minSelect": 0,
         "name": "userId",
         "presentable": false,
-        "required": false,
+        "required": true,
         "system": false,
         "type": "relation"
       },
@@ -1088,7 +1075,7 @@
       "CREATE UNIQUE INDEX `idx_0UWlVOdDqD` ON `organisationUserPermissions` (`userOrgKey`)"
     ],
     "created": "2026-02-10 15:36:44.907Z",
-    "updated": "2026-02-11 09:19:23.015Z",
+    "updated": "2026-02-11 11:08:47.853Z",
     "system": false
   }
 ]

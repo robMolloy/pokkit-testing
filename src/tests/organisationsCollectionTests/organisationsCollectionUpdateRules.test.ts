@@ -1,16 +1,9 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { superuserPb, userPb } from "../../config/pocketbaseConfig";
-import {
-  globalUserPermissionsCollectionName,
-  organisationsCollectionName,
-  organisationUserPermissionsCollectionName,
-  superusersCollectionName,
-  usersCollectionName,
-} from "../helpers/pocketbaseMetadata";
-import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
-import { createUserEmailPasswordData, createUserRecord } from "../helpers/pocketbaseUserHelpers";
-import { createGlobalUserPermissionRecordSeedData } from "../helpers/globalUserPermissionHelpers";
+import { userPb } from "../../config/pocketbaseConfig";
 import { createOrganisationRecordSeedData } from "../helpers/organisationsCollectionHelpers";
+import { organisationsCollectionName, usersCollectionName } from "../helpers/pocketbaseMetadata";
+import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
+import { createUserEmailPasswordData } from "../helpers/pocketbaseUserHelpers";
 
 // createRule: @request.auth.id != "" && @collection.globalUserPermissions.id ?= @request.auth.id && @collection.globalUserPermissions.role ?= "admin"
 // Standard: @request.auth.id != "" && @request.auth.id = id
@@ -82,13 +75,9 @@ describe(`PocketBase organisations collection update rules as admin user`, () =>
   });
 
   it("allows admin user to update an organisation record", async () => {
-    console.log(
-      `src/tests/organisationsCollectionTests/organisationsCollectionUpdateRules.test.ts:${/*LL*/ 86}`,
-      {},
-    );
     // first user gains an approved admin global permission
     const adminUserSeed = createUserEmailPasswordData();
-    const adminUserRecord = await userPb.collection(usersCollectionName).create({
+    await userPb.collection(usersCollectionName).create({
       email: adminUserSeed.email,
       password: adminUserSeed.password,
       passwordConfirm: adminUserSeed.password,
@@ -99,20 +88,15 @@ describe(`PocketBase organisations collection update rules as admin user`, () =>
       .authWithPassword(adminUserSeed.email, adminUserSeed.password);
 
     // creator user gains an approved admin organisation permission
-    const organisationSeedData = createOrganisationRecordSeedData({
-      createdByUserId: adminUserRecord.id,
-    });
+    const organisationSeedData = createOrganisationRecordSeedData();
     const organisationRecord = await userPb
       .collection(organisationsCollectionName)
       .create(organisationSeedData);
 
-    await superuserPb
-      .collection(superusersCollectionName)
-      .authWithPassword("admin@admin.com", "admin@admin.com");
-
-    const x = await userPb
+    const updatedOrganisationRecord = await userPb
       .collection(organisationsCollectionName)
       .update(organisationRecord.id, { name: "Updated Organisation Name" });
-    expect(x.name).toBe("Updated Organisation Name");
+
+    expect(updatedOrganisationRecord.name).toBe("Updated Organisation Name");
   });
 });

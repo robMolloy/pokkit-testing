@@ -22,10 +22,10 @@ export async function clearDatabase() {
   await Promise.all(truncationPromises);
 
   const superuserRecords = await superuserPb.collection(superusersCollectionName).getFullList();
-  superuserRecords
+  const deleteSuperuserPromises = superuserRecords
     .filter((record) => record.email !== parsedEnv.TEST_DB_USERNAME)
     .map((record) => superuserPb.collection(superusersCollectionName).delete(record.id));
-  await Promise.all(truncationPromises);
+  await Promise.all(deleteSuperuserPromises);
 
   superuserPb.authStore.clear();
   userPb.authStore.clear();

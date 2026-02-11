@@ -22,7 +22,8 @@ onRecordAfterCreateSuccess((e) => {
   e.next();
 }, "users");
 
-onRecordAfterCreateSuccess((e) => {
+onRecordCreateRequest((e) => {
+  e.next();
   const organisation = e.record;
 
   const organisationUserPermissionsCollection = $app.findCollectionByNameOrId(
@@ -30,15 +31,11 @@ onRecordAfterCreateSuccess((e) => {
   );
 
   const organisationUserPermissionsRecord = new Record(organisationUserPermissionsCollection);
-  const createdByUserId = organisation.get("createdByUserId");
-
-  organisationUserPermissionsRecord.set("userId", createdByUserId);
+  organisationUserPermissionsRecord.set("userId", e.auth.id);
   organisationUserPermissionsRecord.set("organisationId", organisation.id);
   organisationUserPermissionsRecord.set("role", "admin");
   organisationUserPermissionsRecord.set("status", "approved");
-  organisationUserPermissionsRecord.set("userOrgKey", `${createdByUserId}-${organisation.id}`);
+  organisationUserPermissionsRecord.set("userOrgKey", `${e.auth.id}-${organisation.id}`);
 
-  const x = $app.save(organisationUserPermissionsRecord);
-
-  e.next();
+  $app.save(organisationUserPermissionsRecord);
 }, "organisations");
