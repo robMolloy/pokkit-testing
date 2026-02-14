@@ -885,7 +885,7 @@
     "viewRule": null,
     "createRule": "@request.auth.id != \"\" && \n@collection.globalUserPermissions.userId ?= @request.auth.id && \n@collection.globalUserPermissions.role = \"admin\"",
     "updateRule": "@request.auth.id != \"\" && \n@collection.organisationUserPermissions.userId ?= @request.auth.id && \n@collection.organisationUserPermissions.organisationId ?= id && \n@collection.organisationUserPermissions.role = \"admin\"",
-    "deleteRule": null,
+    "deleteRule": "@request.auth.id != \"\" && \n@collection.organisationUserPermissions.userId ?= @request.auth.id && \n@collection.organisationUserPermissions.organisationId ?= id && \n@collection.organisationUserPermissions.role = \"admin\"",
     "name": "organisations",
     "type": "base",
     "fields": [
@@ -954,7 +954,7 @@
     ],
     "indexes": [],
     "created": "2026-02-10 15:36:44.903Z",
-    "updated": "2026-02-11 10:05:05.748Z",
+    "updated": "2026-02-11 22:55:11.962Z",
     "system": false
   },
   {
