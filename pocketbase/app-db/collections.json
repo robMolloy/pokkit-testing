@@ -881,8 +881,8 @@
   },
   {
     "id": "pbc_1053844701",
-    "listRule": null,
-    "viewRule": null,
+    "listRule": "@request.auth.id != \"\"",
+    "viewRule": "@request.auth.id != \"\"",
     "createRule": "@request.auth.id != \"\" && \n@collection.globalUserPermissions.userId ?= @request.auth.id && \n@collection.globalUserPermissions.role = \"admin\"",
     "updateRule": "@request.auth.id != \"\" && \n@collection.organisationUserPermissions.userId ?= @request.auth.id && \n@collection.organisationUserPermissions.organisationId ?= id && \n@collection.organisationUserPermissions.role = \"admin\"",
     "deleteRule": "@request.auth.id != \"\" && \n@collection.organisationUserPermissions.userId ?= @request.auth.id && \n@collection.organisationUserPermissions.organisationId ?= id && \n@collection.organisationUserPermissions.role = \"admin\"",
@@ -954,7 +954,7 @@
     ],
     "indexes": [],
     "created": "2026-02-10 15:36:44.903Z",
-    "updated": "2026-02-11 22:55:11.962Z",
+    "updated": "2026-02-15 00:09:39.543Z",
     "system": false
   },
   {
