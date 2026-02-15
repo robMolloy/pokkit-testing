@@ -961,7 +961,7 @@
     "id": "pbc_230240349",
     "listRule": "@request.auth.id != \"\" && \n@collection.organisationUserPermissions.userId ?= @request.auth.id && \n@collection.organisationUserPermissions.organisationId ?= organisationId && \n@collection.organisationUserPermissions.role = \"admin\"",
     "viewRule": "@request.auth.id != \"\" && \n@collection.organisationUserPermissions.userId ?= @request.auth.id && \n@collection.organisationUserPermissions.organisationId ?= organisationId && \n@collection.organisationUserPermissions.role = \"admin\"",
-    "createRule": null,
+    "createRule": "@request.auth.id != \"\" && \n@collection.organisationUserPermissions.userId ?= @request.auth.id && \n@collection.organisationUserPermissions.organisationId ?= organisationId && \n@collection.organisationUserPermissions.role = \"admin\"",
     "updateRule": null,
     "deleteRule": null,
     "name": "organisationUserPermissions",
@@ -1075,7 +1075,7 @@
       "CREATE UNIQUE INDEX `idx_0UWlVOdDqD` ON `organisationUserPermissions` (`userOrgKey`)"
     ],
     "created": "2026-02-10 15:36:44.907Z",
-    "updated": "2026-02-15 00:38:01.736Z",
+    "updated": "2026-02-15 00:45:00.547Z",
     "system": false
   }
 ]
