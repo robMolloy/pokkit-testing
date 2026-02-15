@@ -960,7 +960,7 @@
   {
     "id": "pbc_230240349",
     "listRule": null,
-    "viewRule": null,
+    "viewRule": "@request.auth.id != \"\" && \n@collection.organisationUserPermissions.userId ?= @request.auth.id && \n@collection.organisationUserPermissions.organisationId ?= organisationId && \n@collection.organisationUserPermissions.role = \"admin\"",
     "createRule": null,
     "updateRule": null,
     "deleteRule": null,
@@ -1075,7 +1075,7 @@
       "CREATE UNIQUE INDEX `idx_0UWlVOdDqD` ON `organisationUserPermissions` (`userOrgKey`)"
     ],
     "created": "2026-02-10 15:36:44.907Z",
-    "updated": "2026-02-11 11:08:47.853Z",
+    "updated": "2026-02-15 00:28:03.779Z",
     "system": false
   }
 ]
