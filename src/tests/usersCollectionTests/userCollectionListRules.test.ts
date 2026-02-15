@@ -32,7 +32,7 @@ describe(`PocketBase user collection list rules as standard user`, () => {
     const resp = await userPb.collection(usersCollectionName).getFullList();
 
     expect(resp.length).toBe(1);
-    expect(resp[0].id).toBe(createResp.id);
+    expect(resp[0]?.id).toBe(createResp.id);
   });
 
   it("deny logged out user to list any users record", async () => {

@@ -91,6 +91,6 @@ describe("PocketBase users collection rules", () => {
     // Verify list returns only own record
     const records = await userPb.collection(usersCollectionName).getFullList();
     expect(records.length).toBe(1);
-    expect(records[0].id).toBe(userRecord1.id);
+    expect(records[0]?.id).toBe(userRecord1.id);
   });
 });

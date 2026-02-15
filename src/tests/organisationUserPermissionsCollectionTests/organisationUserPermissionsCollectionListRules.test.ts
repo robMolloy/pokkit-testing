@@ -49,6 +49,7 @@ describe(`organisation user permissions collection list rules - unhappy paths`, 
     const orgUserPermsRecord = orgUserPermsRecords[0];
 
     expect(orgUserPermsRecord).toBeTruthy();
+    if (!orgUserPermsRecord) throw new Error("Expected orgUserPermsRecord to have an id");
 
     await superuserPb
       .collection(organisationUserPermissionsCollectionName)
@@ -89,6 +90,7 @@ describe(`organisation user permissions collection list rules - unhappy paths`, 
     const orgUserPermsRecord = orgUserPermsRecords[0];
 
     expect(orgUserPermsRecord).toBeTruthy();
+    if (!orgUserPermsRecord) throw new Error("Expected orgUserPermsRecord to have an id");
 
     await superuserPb
       .collection(organisationUserPermissionsCollectionName)

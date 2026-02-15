@@ -14,7 +14,7 @@ import { createUserEmailPasswordData } from "../helpers/pocketbaseUserHelpers";
 // Standard: @request.auth.id != "" && @request.auth.id = id
 // Admin:    @collection.globalUserPermissions.id ?= @request.auth.id && @collection.globalUserPermissions.role ?= "admin"
 
-describe(`organisation user permissions collection view rules - unhappy paths`, () => {
+describe(`organisation user permissions collection create rules - unhappy paths`, () => {
   beforeEach(async () => {
     await clearDatabase();
   });
@@ -134,7 +134,7 @@ describe(`organisation user permissions collection view rules - unhappy paths`, 
   });
 });
 
-describe(`organisation user permissions collection view rules - happy path`, () => {
+describe(`organisation user permissions collection create rules - happy path`, () => {
   beforeEach(async () => {
     await clearDatabase();
   });
