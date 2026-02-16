@@ -5,3 +5,8 @@ export const createOrganisationRecordSeedData = () => {
     description: `This is a test organisation ${randomNum}`,
   };
 };
+
+export const organisationSeedFactory = {
+  forCreate: (p: { name: string; description: string }) => p,
+  forCreateFilledIn: () => createOrganisationRecordSeedData(),
+};

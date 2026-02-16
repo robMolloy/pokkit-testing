@@ -963,7 +963,7 @@
     "viewRule": "@request.auth.id != \"\" && \n@collection.organisationUserPermissions.userId ?= @request.auth.id && \n@collection.organisationUserPermissions.organisationId ?= organisationId && \n@collection.organisationUserPermissions.role = \"admin\"",
     "createRule": "@request.auth.id != \"\" && \n@collection.organisationUserPermissions.userId ?= @request.auth.id && \n@collection.organisationUserPermissions.organisationId ?= organisationId && \n@collection.organisationUserPermissions.role ?= \"admin\"",
     "updateRule": "@request.auth.id != \"\" && \n@collection.organisationUserPermissions.userId ?= @request.auth.id && \n@collection.organisationUserPermissions.organisationId ?= organisationId && \n@collection.organisationUserPermissions.role ?= \"admin\"",
-    "deleteRule": null,
+    "deleteRule": "@request.auth.id != \"\" && \n@collection.organisationUserPermissions.userId ?= @request.auth.id && \n@collection.organisationUserPermissions.organisationId ?= organisationId && \n@collection.organisationUserPermissions.role ?= \"admin\"",
     "name": "organisationUserPermissions",
     "type": "base",
     "fields": [
@@ -1075,7 +1075,7 @@
       "CREATE UNIQUE INDEX `idx_0UWlVOdDqD` ON `organisationUserPermissions` (`userOrgKey`)"
     ],
     "created": "2026-02-10 15:36:44.907Z",
-    "updated": "2026-02-15 09:51:32.235Z",
+    "updated": "2026-02-15 22:03:35.713Z",
     "system": false
   }
 ]
