@@ -1077,5 +1077,82 @@
     "created": "2026-02-10 15:36:44.907Z",
     "updated": "2026-02-15 22:03:35.713Z",
     "system": false
+  },
+  {
+    "id": "pbc_1115152794",
+    "listRule": null,
+    "viewRule": "@request.auth.id != \"\" && \n@collection.organisationUserPermissions.userId ?= @request.auth.id && \n@collection.organisationUserPermissions.organisationId ?= organisationId && \n(@collection.organisationUserPermissions.role ?= \"admin\" || \n @collection.organisationUserPermissions.role ?= \"standard\")",
+    "createRule": null,
+    "updateRule": null,
+    "deleteRule": null,
+    "name": "organisationNotes",
+    "type": "base",
+    "fields": [
+      {
+        "autogeneratePattern": "[a-z0-9]{15}",
+        "hidden": false,
+        "id": "text3208210256",
+        "max": 15,
+        "min": 15,
+        "name": "id",
+        "pattern": "^[a-z0-9]+$",
+        "presentable": false,
+        "primaryKey": true,
+        "required": true,
+        "system": true,
+        "type": "text"
+      },
+      {
+        "autogeneratePattern": "",
+        "hidden": false,
+        "id": "text2529069283",
+        "max": 0,
+        "min": 0,
+        "name": "markdown",
+        "pattern": "",
+        "presentable": false,
+        "primaryKey": false,
+        "required": false,
+        "system": false,
+        "type": "text"
+      },
+      {
+        "cascadeDelete": false,
+        "collectionId": "pbc_1053844701",
+        "hidden": false,
+        "id": "relation1656987439",
+        "maxSelect": 1,
+        "minSelect": 0,
+        "name": "organisationId",
+        "presentable": false,
+        "required": false,
+        "system": false,
+        "type": "relation"
+      },
+      {
+        "hidden": false,
+        "id": "autodate2990389176",
+        "name": "created",
+        "onCreate": true,
+        "onUpdate": false,
+        "presentable": false,
+        "system": false,
+        "type": "autodate"
+      },
+      {
+        "hidden": false,
+        "id": "autodate3332085495",
+        "name": "updated",
+        "onCreate": true,
+        "onUpdate": true,
+        "presentable": false,
+        "system": false,
+        "type": "autodate"
+      }
+    ],
+    "indexes": [],
+    "created": "2026-02-16 20:35:02.672Z",
+    "updated": "2026-02-16 21:15:42.778Z",
+    "system": false
   }
 ]
