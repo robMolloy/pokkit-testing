@@ -14,9 +14,9 @@ import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
 import { userSeedFactory } from "../helpers/pocketbaseUserHelpers";
 import { parsedEnv } from "../helpers/testEnvHelpers";
 
-// viewRule: @request.auth.id != "" && @collection.organisationUserPermissions.userId ?= @request.auth.id && @collection.organisationUserPermissions.organisationId ?= organisationId && (@collection.organisationUserPermissions.role ?= "admin" ||  @collection.organisationUserPermissions.role ?= "standard")
+// createRule: @request.auth.id != "" && @collection.organisationUserPermissions.userId ?= @request.auth.id && @collection.organisationUserPermissions.organisationId ?= organisationId && (@collection.organisationUserPermissions.role ?= "admin" ||  @collection.organisationUserPermissions.role ?= "standard")
 
-const setupOrgNotesRecordForViewTests = async () => {
+const setupOrgNotesRecordForCreateTests = async () => {
   const superuserPb = createNewPbInstance();
   await superuserPb
     .collection(superusersCollectionName)
@@ -140,7 +140,7 @@ describe(`organisation notes collection create rules - happy path`, () => {
       - admin orgUserPermission
   `, async () => {
     const { globalAndOrgAdminUserPb, orgAdminUserPb, organisationRecord } =
-      await setupOrgNotesRecordForViewTests();
+      await setupOrgNotesRecordForCreateTests();
     const organisationNoteRecordResp1 = await globalAndOrgAdminUserPb
       .collection(organisationNotesCollectionName)
       .create(
@@ -169,7 +169,7 @@ describe(`organisation notes collection create rules - unhappy paths`, () => {
   it(`denies user to create an organisation note record if;
       - standard orgUserPermission record
   `, async () => {
-    const { orgStandardUserPb, organisationRecord } = await setupOrgNotesRecordForViewTests();
+    const { orgStandardUserPb, organisationRecord } = await setupOrgNotesRecordForCreateTests();
     await expect(
       orgStandardUserPb.collection(organisationNotesCollectionName).create(
         organisationNoteSeedFactory.forCreate({
@@ -184,7 +184,7 @@ describe(`organisation notes collection create rules - unhappy paths`, () => {
       - no orgUserPermission record
   `, async () => {
     const { orgStandardUserPb, organisationRecord, superuserPb, orgStandardUserPermissionsRecord } =
-      await setupOrgNotesRecordForViewTests();
+      await setupOrgNotesRecordForCreateTests();
 
     await superuserPb
       .collection(organisationUserPermissionsCollectionName)

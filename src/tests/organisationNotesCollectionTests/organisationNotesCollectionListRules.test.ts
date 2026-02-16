@@ -16,7 +16,7 @@ import { parsedEnv } from "../helpers/testEnvHelpers";
 
 // listRule: @request.auth.id != "" && @collection.organisationUserPermissions.userId ?= @request.auth.id && @collection.organisationUserPermissions.organisationId ?= organisationId && (@collection.organisationUserPermissions.role ?= "admin" ||  @collection.organisationUserPermissions.role ?= "standard")
 
-const setupOrgNotesRecordForViewTests = async () => {
+const setupOrgNotesRecordForListTests = async () => {
   const superuserPb = createNewPbInstance();
   await superuserPb
     .collection(superusersCollectionName)
@@ -147,7 +147,7 @@ describe(`organisation notes collection list rules - happy path`, () => {
       - admin or standard orgUserPermission
   `, async () => {
     const { globalAndOrgAdminUserPb, orgAdminUserPb, orgStandardUserPb } =
-      await setupOrgNotesRecordForViewTests();
+      await setupOrgNotesRecordForListTests();
     const organisationNoteRecordResp1 = await globalAndOrgAdminUserPb
       .collection(organisationNotesCollectionName)
       .getFullList();
@@ -172,7 +172,7 @@ describe(`organisation notes collection list rules - unhappy paths`, () => {
       - no orgUserPermission record
   `, async () => {
     const { orgStandardUserPb, superuserPb, orgStandardUserPermissionsRecord } =
-      await setupOrgNotesRecordForViewTests();
+      await setupOrgNotesRecordForListTests();
 
     await superuserPb
       .collection(organisationUserPermissionsCollectionName)

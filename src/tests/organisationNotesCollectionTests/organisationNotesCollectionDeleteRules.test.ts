@@ -14,7 +14,7 @@ import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
 import { userSeedFactory } from "../helpers/pocketbaseUserHelpers";
 import { parsedEnv } from "../helpers/testEnvHelpers";
 
-// deleteRule: @request.auth.id != "" && @collection.organisationUserPermissions.userId ?= @request.auth.id && @collection.organisationUserPermissions.organisationId ?= organisationId && (@collection.organisationUserPermissions.role ?= "admin" ||  @collection.organisationUserPermissions.role ?= "standard")
+// deleteRule: @request.auth.id != "" && @collection.organisationUserPermissions.userId ?= @request.auth.id && @collection.organisationUserPermissions.organisationId ?= organisationId && @collection.organisationUserPermissions.role ?= "admin"
 
 const setupOrgNotesRecordForDeleteTests = async () => {
   const superuserPb = createNewPbInstance();
@@ -159,15 +159,19 @@ describe(`organisation notes collection delete rules - happy path`, () => {
   it(`allows user to delete an organisation note record if;
       - admin orgUserPermission
   `, async () => {
-    const { globalAndOrgAdminUserPb, organisationNoteRecord1, organisationNoteRecord2 } =
-      await setupOrgNotesRecordForDeleteTests();
+    const {
+      globalAndOrgAdminUserPb,
+      orgAdminUserPb,
+      organisationNoteRecord1,
+      organisationNoteRecord2,
+    } = await setupOrgNotesRecordForDeleteTests();
 
     const organisationNoteRecordResp1 = await globalAndOrgAdminUserPb
       .collection(organisationNotesCollectionName)
       .delete(organisationNoteRecord1.id);
     expect(organisationNoteRecordResp1).toBeTruthy();
 
-    const organisationNoteRecordResp2 = await globalAndOrgAdminUserPb
+    const organisationNoteRecordResp2 = await orgAdminUserPb
       .collection(organisationNotesCollectionName)
       .delete(organisationNoteRecord2.id);
     expect(organisationNoteRecordResp2).toBeTruthy();
