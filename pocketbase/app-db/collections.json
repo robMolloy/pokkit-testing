@@ -1082,7 +1082,7 @@
     "id": "pbc_1115152794",
     "listRule": "@request.auth.id != \"\" && \n@collection.organisationUserPermissions.userId ?= @request.auth.id && \n@collection.organisationUserPermissions.organisationId ?= organisationId && \n(@collection.organisationUserPermissions.role ?= \"admin\" || \n @collection.organisationUserPermissions.role ?= \"standard\")",
     "viewRule": "@request.auth.id != \"\" && \n@collection.organisationUserPermissions.userId ?= @request.auth.id && \n@collection.organisationUserPermissions.organisationId ?= organisationId && \n(@collection.organisationUserPermissions.role ?= \"admin\" || \n @collection.organisationUserPermissions.role ?= \"standard\")",
-    "createRule": null,
+    "createRule": "@request.auth.id != \"\" && \n@collection.organisationUserPermissions.userId ?= @request.auth.id && \n@collection.organisationUserPermissions.organisationId ?= organisationId && \n@collection.organisationUserPermissions.role ?= \"admin\"",
     "updateRule": null,
     "deleteRule": null,
     "name": "organisationNotes",
@@ -1152,7 +1152,7 @@
     ],
     "indexes": [],
     "created": "2026-02-16 20:35:02.672Z",
-    "updated": "2026-02-16 21:37:32.850Z",
+    "updated": "2026-02-16 21:42:45.955Z",
     "system": false
   }
 ]
