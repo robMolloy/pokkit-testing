@@ -141,9 +141,7 @@ const setupOrgNotesRecordForViewTests = async () => {
 };
 
 describe(`organisation notes collection list rules - happy path`, () => {
-  beforeEach(async () => {
-    await clearDatabase();
-  });
+  beforeEach(async () => await clearDatabase());
 
   it.only(`allows user to list organisation note records if;
       - admin or standard orgUserPermission
@@ -168,9 +166,7 @@ describe(`organisation notes collection list rules - happy path`, () => {
 });
 
 describe(`organisation notes collection list rules - unhappy paths`, () => {
-  beforeEach(async () => {
-    await clearDatabase();
-  });
+  beforeEach(() => clearDatabase());
 
   it.only(`denies user to list organisation note records if;
       - no orgUserPermission record
