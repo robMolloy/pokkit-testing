@@ -1083,7 +1083,7 @@
     "listRule": "@request.auth.id != \"\" && \n@collection.organisationUserPermissions.userId ?= @request.auth.id && \n@collection.organisationUserPermissions.organisationId ?= organisationId && \n(@collection.organisationUserPermissions.role ?= \"admin\" || \n @collection.organisationUserPermissions.role ?= \"standard\")",
     "viewRule": "@request.auth.id != \"\" && \n@collection.organisationUserPermissions.userId ?= @request.auth.id && \n@collection.organisationUserPermissions.organisationId ?= organisationId && \n(@collection.organisationUserPermissions.role ?= \"admin\" || \n @collection.organisationUserPermissions.role ?= \"standard\")",
     "createRule": "@request.auth.id != \"\" && \n@collection.organisationUserPermissions.userId ?= @request.auth.id && \n@collection.organisationUserPermissions.organisationId ?= organisationId && \n@collection.organisationUserPermissions.role ?= \"admin\"",
-    "updateRule": null,
+    "updateRule": "@request.auth.id != \"\" && \n@collection.organisationUserPermissions.userId ?= @request.auth.id && \n@collection.organisationUserPermissions.organisationId ?= organisationId && \n@collection.organisationUserPermissions.role ?= \"admin\"",
     "deleteRule": null,
     "name": "organisationNotes",
     "type": "base",
@@ -1152,7 +1152,7 @@
     ],
     "indexes": [],
     "created": "2026-02-16 20:35:02.672Z",
-    "updated": "2026-02-16 21:42:45.955Z",
+    "updated": "2026-02-16 22:24:29.112Z",
     "system": false
   }
 ]
