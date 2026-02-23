@@ -1,19 +1,61 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { userPb } from "../../config/pocketbaseConfig";
 import {
   globalUserPermissionsCollectionName,
   usersCollectionName,
 } from "../helpers/pocketbaseMetadata";
-import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
+import { clearSpecifiedDatabase } from "../helpers/pocketbaseTestHelpers";
 import { createUserEmailPasswordData, createUserRecord } from "../helpers/pocketbaseUserHelpers";
+
+import { type ChildProcessWithoutNullStreams } from "child_process";
+import { setupAndServeTestDb } from "../helpers/_helpers";
 
 // @request.auth.id = id || @collection.globalUserPermissions.userId ?= @request.auth.id && @collection.globalUserPermissions.role = "admin"
 // Standard: @request.auth.id = id
 // Admin:    @collection.globalUserPermissions.userId ?= @request.auth.id && @collection.globalUserPermissions.role = "admin"
 
+const buildFileName = "app-db";
+const buildDirPath = "pocketbase/app-db/builds";
+const buildFilePath = `${buildDirPath}/${buildFileName}`;
+const tempDirName = "_temp";
+const tempTestDirName = "testTemp";
+const tempTestDirPath = `${tempDirName}/${tempTestDirName}`;
+const tempTestFilePath = `${tempTestDirPath}/${buildFileName}`;
+const appDbUrl = "http://0.0.0.0:8090";
+const appDbSuperuserEmail = "admin@admin.com";
+const appDbSuperuserPassword = "admin@admin.com";
+const testDbUrl = `http://0.0.0.0:8071`;
+const testDbSuperuserEmail = "admin@admin.com";
+const testDbSuperuserPassword = "admin@admin.com";
+
+let spawnProcess: ChildProcessWithoutNullStreams | undefined;
 describe(`PocketBase user collection list rules as standard user`, () => {
+  beforeAll(async () => {
+    spawnProcess = await setupAndServeTestDb({
+      spawnProcess,
+      tempTestDirPath,
+      tempTestFilePath,
+      buildFilePath,
+      appDbUrl,
+      appDbSuperuserEmail,
+      appDbSuperuserPassword,
+      testDbUrl,
+      testDbSuperuserEmail,
+      testDbSuperuserPassword,
+    });
+  });
+
+  afterAll(async () => {
+    await spawnProcess?.kill("SIGTERM");
+    spawnProcess = undefined;
+  });
+
   beforeEach(async () => {
-    await clearDatabase();
+    await clearSpecifiedDatabase({
+      testDbUrl,
+      testDbSuperuserEmail,
+      testDbSuperuserPassword,
+    });
   });
 
   it("allows user to list own record", async () => {
@@ -55,12 +97,6 @@ describe(`PocketBase user collection list rules as standard user`, () => {
 
     const resp = await userPb.collection(usersCollectionName).getFullList();
     expect(resp.length).toBe(0);
-  });
-});
-
-describe(`PocketBase user collection list rules as admin user`, () => {
-  beforeEach(async () => {
-    await clearDatabase();
   });
 
   it("allow admin user to list all user records (inc. own)", async () => {
