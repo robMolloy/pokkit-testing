@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { userPb } from "../../config/pocketbaseConfig";
+import { PocketBase, userPb } from "../../config/pocketbaseConfig";
 import {
   globalUserPermissionsCollectionName,
   usersCollectionName,
@@ -20,7 +20,7 @@ const testDirPath = `_temp/testTemp`;
 const appDbUrl = "http://0.0.0.0:8090";
 const appDbSuperuserEmail = "admin@admin.com";
 const appDbSuperuserPassword = "admin@admin.com";
-const testDbUrl = `http://0.0.0.0:8071`;
+const testDbUrl = `http://0.0.0.0:8099`;
 const testDbSuperuserEmail = "admin@admin.com";
 const testDbSuperuserPassword = "admin@admin.com";
 
@@ -54,7 +54,7 @@ describe(`PocketBase user collection list rules as standard user`, () => {
   });
 
   it("allows user to list own record", async () => {
-    // throwaway record - first user gains an approved admin global permission
+    const userPb = new PocketBase(testDbUrl);
     await createUserRecord({ pb: userPb });
     const userData = createUserEmailPasswordData();
     const createResp = await userPb.collection(usersCollectionName).create({
@@ -73,6 +73,7 @@ describe(`PocketBase user collection list rules as standard user`, () => {
   });
 
   it("deny logged out user to list any users record", async () => {
+    const userPb = new PocketBase(testDbUrl);
     // throwaway record - first user gains an approved admin global permission
     await createUserRecord({ pb: userPb });
 
@@ -95,6 +96,7 @@ describe(`PocketBase user collection list rules as standard user`, () => {
   });
 
   it("allow admin user to list all user records (inc. own)", async () => {
+    const userPb = new PocketBase(testDbUrl);
     const adminUserData = createUserEmailPasswordData();
     const adminUserRecord = await userPb.collection(usersCollectionName).create({
       email: adminUserData.email,
