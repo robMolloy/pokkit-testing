@@ -14,13 +14,9 @@ import { setupAndServeTestDb } from "../helpers/_helpers";
 // Standard: @request.auth.id = id
 // Admin:    @collection.globalUserPermissions.userId ?= @request.auth.id && @collection.globalUserPermissions.role = "admin"
 
-const buildFileName = "app-db";
-const buildDirPath = "pocketbase/app-db/builds";
-const buildFilePath = `${buildDirPath}/${buildFileName}`;
-const tempDirName = "_temp";
-const tempTestDirName = "testTemp";
-const tempTestDirPath = `${tempDirName}/${tempTestDirName}`;
-const tempTestFilePath = `${tempTestDirPath}/${buildFileName}`;
+const pocketbaseBuildFilePath = `pocketbase/app-db/builds/app-db`;
+const testDirPath = `_temp/testTemp`;
+
 const appDbUrl = "http://0.0.0.0:8090";
 const appDbSuperuserEmail = "admin@admin.com";
 const appDbSuperuserPassword = "admin@admin.com";
@@ -33,9 +29,8 @@ describe(`PocketBase user collection list rules as standard user`, () => {
   beforeAll(async () => {
     spawnProcess = await setupAndServeTestDb({
       spawnProcess,
-      tempTestDirPath,
-      tempTestFilePath,
-      buildFilePath,
+      pocketbaseBuildFilePath,
+      testDirPath,
       appDbUrl,
       appDbSuperuserEmail,
       appDbSuperuserPassword,

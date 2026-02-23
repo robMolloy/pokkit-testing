@@ -24,9 +24,8 @@
     "get-platform-arch": "node -e \"console.log(process.platform + '_' + process.arch + (process.platform === 'win32' ? '.exe' : ''))\"",
     "dev1": "npm run db:serve-dev",
     "dev2": "npm run db:build:on-change-to-dev",
-    "dev3": "",
-    "dev4": "npm run test",
-    "dev5": "npm run tsc"
+    "dev3": "npm run test",
+    "dev4": "npm run tsc"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
