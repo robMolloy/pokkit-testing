@@ -147,7 +147,7 @@ const setupOrgNotesRecordForCreateTests = async () => {
 
 let spawnProcess: ChildProcessWithoutNullStreams | undefined;
 
-describe(`organisation notes collection create rules - happy path`, () => {
+describe(`organisation notes collection create rules - happy and unhappy paths`, () => {
   beforeAll(async () => {
     spawnProcess = await setupAndServeTestDb({
       spawnProcess,
