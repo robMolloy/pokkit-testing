@@ -1,22 +1,59 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { userPb } from "../../config/pocketbaseConfig";
+import type { ChildProcessWithoutNullStreams } from "child_process";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { PocketBase } from "../../config/pocketbaseConfig";
+import { setupAndServeTestDb } from "../helpers/_helpers";
 import {
   globalUserPermissionsCollectionName,
   usersCollectionName,
 } from "../helpers/pocketbaseMetadata";
-import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
+import { clearSpecifiedDatabase } from "../helpers/pocketbaseTestHelpers";
 import { createUserEmailPasswordData, createUserRecord } from "../helpers/pocketbaseUserHelpers";
 
 // @request.auth.id = id || @collection.globalUserPermissions.userId ?= @request.auth.id && @collection.globalUserPermissions.role = "admin"
 // Standard: @request.auth.id = id
 // Admin:    @collection.globalUserPermissions.userId ?= @request.auth.id && @collection.globalUserPermissions.role = "admin"
 
+const pocketbaseBuildFilePath = `pocketbase/app-db/builds/app-db`;
+const testDirPath = `_temp/usersCollectionDeleteRules`;
+
+const appDbUrl = "http://0.0.0.0:8090";
+const appDbSuperuserEmail = "admin@admin.com";
+const appDbSuperuserPassword = "admin@admin.com";
+const testDbUrl = `http://0.0.0.0:8091`;
+const testDbSuperuserEmail = "admin@admin.com";
+const testDbSuperuserPassword = "admin@admin.com";
+
+const createNewPbInstance = () => new PocketBase(testDbUrl);
+
+let spawnProcess: ChildProcessWithoutNullStreams | undefined;
+
 describe(`PocketBase user collection view rules as standard user`, () => {
+  beforeAll(async () => {
+    spawnProcess = await setupAndServeTestDb({
+      spawnProcess,
+      pocketbaseBuildFilePath,
+      testDirPath,
+      appDbUrl,
+      appDbSuperuserEmail,
+      appDbSuperuserPassword,
+      testDbUrl,
+      testDbSuperuserEmail,
+      testDbSuperuserPassword,
+    });
+  });
+
+  afterAll(async () => {
+    await spawnProcess?.kill("SIGTERM");
+    spawnProcess = undefined;
+  });
+
   beforeEach(async () => {
-    await clearDatabase();
+    await clearSpecifiedDatabase({ testDbUrl, testDbSuperuserEmail, testDbSuperuserPassword });
   });
 
   it("allows user to view own record", async () => {
+    const userPb = createNewPbInstance();
+
     // throwaway record - first user gains an approved admin global permission
     await createUserRecord({ pb: userPb });
     const userData = createUserEmailPasswordData();
@@ -35,6 +72,8 @@ describe(`PocketBase user collection view rules as standard user`, () => {
   });
 
   it("deny user to view other users record", async () => {
+    const userPb = createNewPbInstance();
+
     // throwaway record - first user gains an approved admin global permission
     await createUserRecord({ pb: userPb });
 
@@ -62,6 +101,8 @@ describe(`PocketBase user collection view rules as standard user`, () => {
   });
 
   it("deny logged out user to view any users record", async () => {
+    const userPb = createNewPbInstance();
+
     // throwaway record - first user gains an approved admin global permission
     await createUserRecord({ pb: userPb });
 
@@ -84,14 +125,10 @@ describe(`PocketBase user collection view rules as standard user`, () => {
     //attempt to get user2 record
     await expect(userPb.collection(usersCollectionName).getOne(createResp2.id)).rejects.toThrow();
   });
-});
-
-describe(`PocketBase user collection view rules as admin user`, () => {
-  beforeEach(async () => {
-    await clearDatabase();
-  });
 
   it("allow admin user to view user's record (inc. own)", async () => {
+    const userPb = createNewPbInstance();
+
     const adminUserData = createUserEmailPasswordData();
     const adminUserRecord = await userPb.collection(usersCollectionName).create({
       email: adminUserData.email,

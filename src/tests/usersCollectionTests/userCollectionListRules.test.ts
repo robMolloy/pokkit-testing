@@ -15,12 +15,12 @@ import { setupAndServeTestDb } from "../helpers/_helpers";
 // Admin:    @collection.globalUserPermissions.userId ?= @request.auth.id && @collection.globalUserPermissions.role = "admin"
 
 const pocketbaseBuildFilePath = `pocketbase/app-db/builds/app-db`;
-const testDirPath = `_temp/testTemp`;
+const testDirPath = `_temp/usersCollectionListRules`;
 
 const appDbUrl = "http://0.0.0.0:8090";
 const appDbSuperuserEmail = "admin@admin.com";
 const appDbSuperuserPassword = "admin@admin.com";
-const testDbUrl = `http://0.0.0.0:8099`;
+const testDbUrl = `http://0.0.0.0:8104`;
 const testDbSuperuserEmail = "admin@admin.com";
 const testDbSuperuserPassword = "admin@admin.com";
 
