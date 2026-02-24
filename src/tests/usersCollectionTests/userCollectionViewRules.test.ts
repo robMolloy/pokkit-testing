@@ -6,7 +6,7 @@ import {
   globalUserPermissionsCollectionName,
   usersCollectionName,
 } from "../helpers/pocketbaseMetadata";
-import { clearSpecifiedDatabase } from "../helpers/pocketbaseTestHelpers";
+import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
 import { createUserEmailPasswordData, createUserRecord } from "../helpers/pocketbaseUserHelpers";
 
 // @request.auth.id = id || @collection.globalUserPermissions.userId ?= @request.auth.id && @collection.globalUserPermissions.role = "admin"
@@ -48,7 +48,11 @@ describe(`PocketBase user collection view rules as standard user`, () => {
   });
 
   beforeEach(async () => {
-    await clearSpecifiedDatabase({ testDbUrl, testDbSuperuserEmail, testDbSuperuserPassword });
+    await clearDatabase({
+      dbUrl: testDbUrl,
+      dbSuperuserEmail: testDbSuperuserEmail,
+      dbSuperuserPassword: testDbSuperuserPassword,
+    });
   });
 
   it("allows user to view own record", async () => {

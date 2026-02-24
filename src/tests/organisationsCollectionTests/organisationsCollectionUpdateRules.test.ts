@@ -11,7 +11,7 @@ import {
   superusersCollectionName,
   usersCollectionName,
 } from "../helpers/pocketbaseMetadata";
-import { clearSpecifiedDatabase } from "../helpers/pocketbaseTestHelpers";
+import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
 import { createUserEmailPasswordData } from "../helpers/pocketbaseUserHelpers";
 import { parsedEnv } from "../helpers/testEnvHelpers";
 
@@ -54,7 +54,11 @@ describe(`organisations update rules for user with role of "standard" or "admin"
   });
 
   beforeEach(async () => {
-    await clearSpecifiedDatabase({ testDbUrl, testDbSuperuserEmail, testDbSuperuserPassword });
+    await clearDatabase({
+      dbUrl: testDbUrl,
+      dbSuperuserEmail: testDbSuperuserEmail,
+      dbSuperuserPassword: testDbSuperuserPassword,
+    });
   });
 
   it("denies user with standard orgPermission to update an organisation record", async () => {

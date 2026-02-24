@@ -10,7 +10,7 @@ import {
   superusersCollectionName,
   usersCollectionName,
 } from "../helpers/pocketbaseMetadata";
-import { clearSpecifiedDatabase } from "../helpers/pocketbaseTestHelpers";
+import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
 import { createUserEmailPasswordData, createUserRecord } from "../helpers/pocketbaseUserHelpers";
 
 // createRule: @request.auth.id != "" && @collection.globalUserPermissions.id ?= @request.auth.id && @collection.globalUserPermissions.role ?= "admin"
@@ -52,7 +52,11 @@ describe(`PocketBase organisations collection create rules as standard/admin use
   });
 
   beforeEach(async () => {
-    await clearSpecifiedDatabase({ testDbUrl, testDbSuperuserEmail, testDbSuperuserPassword });
+    await clearDatabase({
+      dbUrl: testDbUrl,
+      dbSuperuserEmail: testDbSuperuserEmail,
+      dbSuperuserPassword: testDbSuperuserPassword,
+    });
   });
 
   it("denies standard user to create an organisation record for an existing user if the user has a non admin globalPermissionRecord", async () => {

@@ -4,7 +4,7 @@ import { usersCollectionName } from "../helpers/pocketbaseMetadata";
 import { createUserEmailPasswordData, createUserRecord } from "../helpers/pocketbaseUserHelpers";
 import type { ChildProcessWithoutNullStreams } from "child_process";
 import { setupAndServeTestDb } from "../helpers/_helpers";
-import { clearSpecifiedDatabase } from "../helpers/pocketbaseTestHelpers";
+import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
 
 // id = @request.auth.id
 
@@ -43,7 +43,11 @@ describe(`PocketBase user collection update rules as user`, () => {
   });
 
   beforeEach(async () => {
-    await clearSpecifiedDatabase({ testDbUrl, testDbSuperuserEmail, testDbSuperuserPassword });
+    await clearDatabase({
+      dbUrl: testDbUrl,
+      dbSuperuserEmail: testDbSuperuserEmail,
+      dbSuperuserPassword: testDbSuperuserPassword,
+    });
   });
 
   it("allows user to update own record", async () => {

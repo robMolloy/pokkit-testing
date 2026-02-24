@@ -9,7 +9,7 @@ import {
   organisationUserPermissionsCollectionName,
   usersCollectionName,
 } from "../helpers/pocketbaseMetadata";
-import { clearSpecifiedDatabase } from "../helpers/pocketbaseTestHelpers";
+import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
 import { createUserEmailPasswordData } from "../helpers/pocketbaseUserHelpers";
 
 // createRule: @request.auth.id != "" && @collection.globalUserPermissions.id ?= @request.auth.id && @collection.globalUserPermissions.role ?= "admin"
@@ -51,7 +51,11 @@ describe(`organisation user permissions collection create rules - happy and unha
   });
 
   beforeEach(async () => {
-    await clearSpecifiedDatabase({ testDbUrl, testDbSuperuserEmail, testDbSuperuserPassword });
+    await clearDatabase({
+      dbUrl: testDbUrl,
+      dbSuperuserEmail: testDbSuperuserEmail,
+      dbSuperuserPassword: testDbSuperuserPassword,
+    });
   });
 
   it(`denies user to create an organisation user permission record if;

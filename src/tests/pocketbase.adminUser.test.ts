@@ -7,7 +7,7 @@ import {
   superusersCollectionName,
   usersCollectionName,
 } from "./helpers/pocketbaseMetadata";
-import { clearSpecifiedDatabase } from "./helpers/pocketbaseTestHelpers";
+import { clearDatabase } from "./helpers/pocketbaseTestHelpers";
 import { createUserEmailPasswordData, createUserRecord } from "./helpers/pocketbaseUserHelpers";
 import { parsedEnv } from "./helpers/testEnvHelpers";
 
@@ -46,7 +46,11 @@ describe("PocketBase admin users collection rules", () => {
   });
 
   beforeEach(async () => {
-    await clearSpecifiedDatabase({ testDbUrl, testDbSuperuserEmail, testDbSuperuserPassword });
+    await clearDatabase({
+      dbUrl: testDbUrl,
+      dbSuperuserEmail: testDbSuperuserEmail,
+      dbSuperuserPassword: testDbSuperuserPassword,
+    });
   });
 
   it("allow create: the first user created receives approved admin global permission", async () => {

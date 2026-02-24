@@ -6,7 +6,7 @@ import {
   globalUserPermissionsCollectionName,
   usersCollectionName,
 } from "./helpers/pocketbaseMetadata";
-import { clearSpecifiedDatabase } from "./helpers/pocketbaseTestHelpers";
+import { clearDatabase } from "./helpers/pocketbaseTestHelpers";
 import { createUserEmailPasswordData } from "./helpers/pocketbaseUserHelpers";
 
 const pocketbaseBuildFilePath = `pocketbase/app-db/builds/app-db`;
@@ -44,7 +44,11 @@ describe("PocketBase users collection global permissions", () => {
   });
 
   beforeEach(async () => {
-    await clearSpecifiedDatabase({ testDbUrl, testDbSuperuserEmail, testDbSuperuserPassword });
+    await clearDatabase({
+      dbUrl: testDbUrl,
+      dbSuperuserEmail: testDbSuperuserEmail,
+      dbSuperuserPassword: testDbSuperuserPassword,
+    });
   });
 
   it.only("allow create and read: first user receives approved admin global permission", async () => {

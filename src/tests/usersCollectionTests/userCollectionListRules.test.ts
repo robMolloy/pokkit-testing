@@ -4,7 +4,7 @@ import {
   globalUserPermissionsCollectionName,
   usersCollectionName,
 } from "../helpers/pocketbaseMetadata";
-import { clearSpecifiedDatabase } from "../helpers/pocketbaseTestHelpers";
+import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
 import { createUserEmailPasswordData, createUserRecord } from "../helpers/pocketbaseUserHelpers";
 
 import { type ChildProcessWithoutNullStreams } from "child_process";
@@ -46,10 +46,10 @@ describe(`PocketBase user collection list rules as standard user`, () => {
   });
 
   beforeEach(async () => {
-    await clearSpecifiedDatabase({
-      testDbUrl,
-      testDbSuperuserEmail,
-      testDbSuperuserPassword,
+    await clearDatabase({
+      dbUrl: testDbUrl,
+      dbSuperuserEmail: testDbSuperuserEmail,
+      dbSuperuserPassword: testDbSuperuserPassword,
     });
   });
 

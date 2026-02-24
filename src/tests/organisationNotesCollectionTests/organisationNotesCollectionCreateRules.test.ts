@@ -12,7 +12,7 @@ import {
   superusersCollectionName,
   usersCollectionName,
 } from "../helpers/pocketbaseMetadata";
-import { clearSpecifiedDatabase } from "../helpers/pocketbaseTestHelpers";
+import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
 import { userSeedFactory } from "../helpers/pocketbaseUserHelpers";
 import { parsedEnv } from "../helpers/testEnvHelpers";
 
@@ -168,10 +168,10 @@ describe(`organisation notes collection create rules - happy and unhappy paths`,
   });
 
   beforeEach(async () => {
-    await clearSpecifiedDatabase({
-      testDbUrl,
-      testDbSuperuserEmail,
-      testDbSuperuserPassword,
+    await clearDatabase({
+      dbUrl: testDbUrl,
+      dbSuperuserEmail: testDbSuperuserEmail,
+      dbSuperuserPassword: testDbSuperuserPassword,
     });
   });
   it(`allows user to create an organisation note record if;

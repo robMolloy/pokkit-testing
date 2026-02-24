@@ -3,7 +3,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { PocketBase } from "../config/pocketbaseConfig";
 import { setupAndServeTestDb } from "./helpers/_helpers";
 import { usersCollectionName } from "./helpers/pocketbaseMetadata";
-import { clearSpecifiedDatabase } from "./helpers/pocketbaseTestHelpers";
+import { clearDatabase } from "./helpers/pocketbaseTestHelpers";
 import { createUserEmailPasswordData, createUserRecord } from "./helpers/pocketbaseUserHelpers";
 
 const pocketbaseBuildFilePath = `pocketbase/app-db/builds/app-db`;
@@ -41,7 +41,11 @@ describe("PocketBase users collection rules", () => {
   });
 
   beforeEach(async () => {
-    await clearSpecifiedDatabase({ testDbUrl, testDbSuperuserEmail, testDbSuperuserPassword });
+    await clearDatabase({
+      dbUrl: testDbUrl,
+      dbSuperuserEmail: testDbSuperuserEmail,
+      dbSuperuserPassword: testDbSuperuserPassword,
+    });
   });
 
   it("deny log in: user with invalid credentials", async () => {

@@ -4,7 +4,7 @@ import { PocketBase } from "../../config/pocketbaseConfig";
 import { setupAndServeTestDb } from "../helpers/_helpers";
 import { createOrganisationRecordSeedData } from "../helpers/organisationsCollectionHelpers";
 import { organisationsCollectionName, usersCollectionName } from "../helpers/pocketbaseMetadata";
-import { clearSpecifiedDatabase } from "../helpers/pocketbaseTestHelpers";
+import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
 import { createUserEmailPasswordData } from "../helpers/pocketbaseUserHelpers";
 
 // createRule: @request.auth.id != "" && @collection.globalUserPermissions.id ?= @request.auth.id && @collection.globalUserPermissions.role ?= "admin"
@@ -46,7 +46,11 @@ describe(`organisations collection list rules for logged out/in user`, () => {
   });
 
   beforeEach(async () => {
-    await clearSpecifiedDatabase({ testDbUrl, testDbSuperuserEmail, testDbSuperuserPassword });
+    await clearDatabase({
+      dbUrl: testDbUrl,
+      dbSuperuserEmail: testDbSuperuserEmail,
+      dbSuperuserPassword: testDbSuperuserPassword,
+    });
   });
 
   it(`denies user to list an organisation record, if:
