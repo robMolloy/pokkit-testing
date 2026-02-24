@@ -1,6 +1,9 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { superuserPb, userPb } from "../../config/pocketbaseConfig";
+import type { ChildProcessWithoutNullStreams } from "child_process";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { PocketBase } from "../../config/pocketbaseConfig";
+import { setupAndServeTestDb } from "../helpers/_helpers";
 import { createOrganisationRecordSeedData } from "../helpers/organisationsCollectionHelpers";
+import { organisationUserPermissionSeedFactory } from "../helpers/organisationUserPermissionHelpers";
 import {
   globalUserPermissionsCollectionName,
   organisationsCollectionName,
@@ -8,21 +11,55 @@ import {
   superusersCollectionName,
   usersCollectionName,
 } from "../helpers/pocketbaseMetadata";
-import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
+import { clearSpecifiedDatabase } from "../helpers/pocketbaseTestHelpers";
 import { createUserEmailPasswordData } from "../helpers/pocketbaseUserHelpers";
-import { organisationUserPermissionSeedFactory } from "../helpers/organisationUserPermissionHelpers";
 import { parsedEnv } from "../helpers/testEnvHelpers";
 
 // createRule: @request.auth.id != "" && @collection.globalUserPermissions.id ?= @request.auth.id && @collection.globalUserPermissions.role ?= "admin"
 // Standard: @request.auth.id != "" && @request.auth.id = id
 // Admin:    @collection.globalUserPermissions.id ?= @request.auth.id && @collection.globalUserPermissions.role ?= "admin"
 
-describe(`organisations update rules for user with role of "standard" in organisationUserPermissions`, () => {
+const pocketbaseBuildFilePath = `pocketbase/app-db/builds/app-db`;
+const testDirPath = `_temp/organisationsCollectionUpdateRules`;
+
+const appDbUrl = "http://0.0.0.0:8090";
+const appDbSuperuserEmail = "admin@admin.com";
+const appDbSuperuserPassword = "admin@admin.com";
+const testDbUrl = `http://0.0.0.0:8084`;
+const testDbSuperuserEmail = "admin@admin.com";
+const testDbSuperuserPassword = "admin@admin.com";
+
+const createNewPbInstance = () => new PocketBase(testDbUrl);
+
+let spawnProcess: ChildProcessWithoutNullStreams | undefined;
+
+describe(`organisations update rules for user with role of "standard" or "admin" in organisationUserPermissions`, () => {
+  beforeAll(async () => {
+    spawnProcess = await setupAndServeTestDb({
+      spawnProcess,
+      pocketbaseBuildFilePath,
+      testDirPath,
+      appDbUrl,
+      appDbSuperuserEmail,
+      appDbSuperuserPassword,
+      testDbUrl,
+      testDbSuperuserEmail,
+      testDbSuperuserPassword,
+    });
+  });
+
+  afterAll(async () => {
+    await spawnProcess?.kill("SIGTERM");
+    spawnProcess = undefined;
+  });
+
   beforeEach(async () => {
-    await clearDatabase();
+    await clearSpecifiedDatabase({ testDbUrl, testDbSuperuserEmail, testDbSuperuserPassword });
   });
 
   it("denies user with standard orgPermission to update an organisation record", async () => {
+    const superuserPb = createNewPbInstance();
+    const userPb = createNewPbInstance();
     // first user gains an approved admin global permission
     const adminUserSeed = createUserEmailPasswordData();
     await userPb.collection(usersCollectionName).create({
@@ -79,6 +116,7 @@ describe(`organisations update rules for user with role of "standard" in organis
   });
 
   it("denies user with no orgPermission to update an organisation record", async () => {
+    const userPb = createNewPbInstance();
     // first user gains an approved admin global permission
     const adminUserSeed = createUserEmailPasswordData();
     await userPb.collection(usersCollectionName).create({
@@ -115,16 +153,12 @@ describe(`organisations update rules for user with role of "standard" in organis
         .update(organisationRecord.id, { name: "Updated Organisation Name" }),
     ).rejects.toThrow();
   });
-});
-
-describe(`PocketBase organisations collection update rules as admin user`, () => {
-  beforeEach(async () => {
-    await clearDatabase();
-  });
 
   it(`allows user to update an organisation record if;
     - admin orgPermission 
     - standard/admin/no globalPermission`, async () => {
+    const superuserPb = createNewPbInstance();
+    const userPb = createNewPbInstance();
     await superuserPb
       .collection(superusersCollectionName)
       .authWithPassword(parsedEnv.TEST_DB_USERNAME, parsedEnv.TEST_DB_PASSWORD);
