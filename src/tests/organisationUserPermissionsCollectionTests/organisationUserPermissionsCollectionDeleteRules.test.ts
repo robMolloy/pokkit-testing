@@ -1,19 +1,34 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { superuserPb } from "../../config/pocketbaseConfig";
+import type { ChildProcessWithoutNullStreams } from "child_process";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { PocketBase } from "../../config/pocketbaseConfig";
+import { setupAndServeTestDb } from "../helpers/_helpers";
 import { organisationSeedFactory } from "../helpers/organisationsCollectionHelpers";
 import { organisationUserPermissionSeedFactory } from "../helpers/organisationUserPermissionHelpers";
-import { createNewPbInstance } from "../helpers/pbInstanceHelpers";
 import {
   organisationsCollectionName,
   organisationUserPermissionsCollectionName,
   superusersCollectionName,
   usersCollectionName,
 } from "../helpers/pocketbaseMetadata";
-import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
+import { clearSpecifiedDatabase } from "../helpers/pocketbaseTestHelpers";
 import { userSeedFactory } from "../helpers/pocketbaseUserHelpers";
 import { parsedEnv } from "../helpers/testEnvHelpers";
 
 // deleteRule: @request.auth.id != "" && @collection.organisationUserPermissions.userId ?= @request.auth.id && @collection.organisationUserPermissions.organisationId ?= organisationId && @collection.organisationUserPermissions.role ?= "admin" && @collection.organisationUserPermissions.status ?= "approved"
+
+const pocketbaseBuildFilePath = `pocketbase/app-db/builds/app-db`;
+const testDirPath = `_temp/organisationsUserPermissionsCollectionDeleteRules`;
+
+const appDbUrl = "http://0.0.0.0:8090";
+const appDbSuperuserEmail = "admin@admin.com";
+const appDbSuperuserPassword = "admin@admin.com";
+const testDbUrl = `http://0.0.0.0:8092`;
+const testDbSuperuserEmail = "admin@admin.com";
+const testDbSuperuserPassword = "admin@admin.com";
+
+const createNewPbInstance = () => new PocketBase(testDbUrl);
+
+let spawnProcess: ChildProcessWithoutNullStreams | undefined;
 
 const setupOrgUserPermissionRecordForDeleteTests = async () => {
   // first user gains an approved admin global permission
@@ -82,6 +97,11 @@ const setupOrgUserPermissionRecordForDeleteTests = async () => {
       }),
     );
 
+  const superuserPb = createNewPbInstance();
+  await superuserPb
+    .collection(superusersCollectionName)
+    .authWithPassword(parsedEnv.TEST_DB_USERNAME, parsedEnv.TEST_DB_PASSWORD);
+
   return {
     globalAndOrgAdminUserPb,
     globalAndOrgAdminUserPlainTextRecord: {
@@ -95,19 +115,44 @@ const setupOrgUserPermissionRecordForDeleteTests = async () => {
     orgStandardUserPb,
     orgStandardUserPlainTextRecord: { ...orgStandardUserRecord, ...orgStandardUserSeed },
     orgStandardUserPermissionsRecord,
+
+    superuserPb,
   };
 };
 
-describe(`organisation user permissions collection update rules - unhappy paths`, () => {
+describe(`organisation user permissions collection update rules - unhappy and happy paths`, () => {
+  beforeAll(async () => {
+    spawnProcess = await setupAndServeTestDb({
+      spawnProcess,
+      pocketbaseBuildFilePath,
+      testDirPath,
+      appDbUrl,
+      appDbSuperuserEmail,
+      appDbSuperuserPassword,
+      testDbUrl,
+      testDbSuperuserEmail,
+      testDbSuperuserPassword,
+    });
+  });
+
+  afterAll(async () => {
+    await spawnProcess?.kill("SIGTERM");
+    spawnProcess = undefined;
+  });
+
   beforeEach(async () => {
-    await clearDatabase();
+    await clearSpecifiedDatabase({ testDbUrl, testDbSuperuserEmail, testDbSuperuserPassword });
   });
 
   it(`denied user to update an organisation user permission record if  user;
       - no orgUserPermission
   `, async () => {
-    const { orgAdminUserPermissionsRecord, orgStandardUserPermissionsRecord, orgStandardUserPb } =
-      await setupOrgUserPermissionRecordForDeleteTests();
+    const {
+      orgAdminUserPermissionsRecord,
+      orgStandardUserPermissionsRecord,
+      orgStandardUserPb,
+      superuserPb,
+    } = await setupOrgUserPermissionRecordForDeleteTests();
 
     await superuserPb
       .collection(superusersCollectionName)
@@ -138,12 +183,6 @@ describe(`organisation user permissions collection update rules - unhappy paths`
         .collection(organisationUserPermissionsCollectionName)
         .delete(orgAdminUserPermissionsRecord.id),
     ).rejects.toThrow();
-  });
-});
-
-describe(`organisation user permissions collection update rules - happy path`, () => {
-  beforeEach(async () => {
-    await clearDatabase();
   });
 
   it(`allows user to update an organisation user permission record if;
