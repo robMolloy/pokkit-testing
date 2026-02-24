@@ -1,8 +1,10 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import type { ChildProcessWithoutNullStreams } from "child_process";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { PocketBase } from "../../config/pocketbaseConfig";
+import { setupAndServeTestDb } from "../helpers/_helpers";
 import { organisationNoteSeedFactory } from "../helpers/organisationNotesHelpers";
 import { organisationSeedFactory } from "../helpers/organisationsCollectionHelpers";
 import { organisationUserPermissionSeedFactory } from "../helpers/organisationUserPermissionHelpers";
-import { createNewPbInstance } from "../helpers/pbInstanceHelpers";
 import {
   organisationNotesCollectionName,
   organisationsCollectionName,
@@ -10,20 +12,32 @@ import {
   superusersCollectionName,
   usersCollectionName,
 } from "../helpers/pocketbaseMetadata";
-import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
+import { clearSpecifiedDatabase } from "../helpers/pocketbaseTestHelpers";
 import { userSeedFactory } from "../helpers/pocketbaseUserHelpers";
 import { parsedEnv } from "../helpers/testEnvHelpers";
 
 // createRule: @request.auth.id != "" && @collection.organisationUserPermissions.userId ?= @request.auth.id && @collection.organisationUserPermissions.organisationId ?= organisationId && (@collection.organisationUserPermissions.role ?= "admin" ||  @collection.organisationUserPermissions.role ?= "standard")
 
+const pocketbaseBuildFilePath = `pocketbase/app-db/builds/app-db`;
+const testDirPath = `_temp/testTemp`;
+
+const appDbUrl = "http://0.0.0.0:8090";
+const appDbSuperuserEmail = "admin@admin.com";
+const appDbSuperuserPassword = "admin@admin.com";
+const testDbUrl = `http://0.0.0.0:8071`;
+const testDbSuperuserEmail = "admin@admin.com";
+const testDbSuperuserPassword = "admin@admin.com";
+
+const createPbInstance = () => new PocketBase(testDbUrl);
+
 const setupOrgNotesRecordForCreateTests = async () => {
-  const superuserPb = createNewPbInstance();
+  const superuserPb = createPbInstance();
   await superuserPb
     .collection(superusersCollectionName)
     .authWithPassword(parsedEnv.TEST_DB_USERNAME, parsedEnv.TEST_DB_PASSWORD);
 
   // first user gains an approved admin global permission
-  const globalAndOrgAdminUserPb = createNewPbInstance();
+  const globalAndOrgAdminUserPb = createPbInstance();
   const globalAndOrgAdminUserSeed = userSeedFactory.forCreateFilledIn();
   // global and org admin user record created
   const globalAndOrgAdminUserRecord = await globalAndOrgAdminUserPb
@@ -44,7 +58,7 @@ const setupOrgNotesRecordForCreateTests = async () => {
     .collection(organisationsCollectionName)
     .create(organisationSeedFactory.forCreateFilledIn());
 
-  const orgAdminUserPb = createNewPbInstance();
+  const orgAdminUserPb = createPbInstance();
   const orgAdminUserSeed = userSeedFactory.forCreateFilledIn();
   //  create org admin user record
   const orgAdminUserRecord = await orgAdminUserPb.collection(usersCollectionName).create({
@@ -70,7 +84,7 @@ const setupOrgNotesRecordForCreateTests = async () => {
       }),
     );
 
-  const orgStandardUserPb = createNewPbInstance();
+  const orgStandardUserPb = createPbInstance();
   const orgStandardUserSeed = userSeedFactory.forCreateFilledIn();
   // create org standard user record
   const orgStandardUserRecord = await orgStandardUserPb.collection(usersCollectionName).create({
@@ -95,7 +109,7 @@ const setupOrgNotesRecordForCreateTests = async () => {
       }),
     );
 
-  const notInOrgUserPb = createNewPbInstance();
+  const notInOrgUserPb = createPbInstance();
   const notInOrgUserSeed = userSeedFactory.forCreateFilledIn();
   // create not in org user record
   const notInOrgUserRecord = await notInOrgUserPb.collection(usersCollectionName).create({
@@ -131,11 +145,35 @@ const setupOrgNotesRecordForCreateTests = async () => {
   };
 };
 
+let spawnProcess: ChildProcessWithoutNullStreams | undefined;
+
 describe(`organisation notes collection create rules - happy path`, () => {
-  beforeEach(async () => {
-    await clearDatabase();
+  beforeAll(async () => {
+    spawnProcess = await setupAndServeTestDb({
+      spawnProcess,
+      pocketbaseBuildFilePath,
+      testDirPath,
+      appDbUrl,
+      appDbSuperuserEmail,
+      appDbSuperuserPassword,
+      testDbUrl,
+      testDbSuperuserEmail,
+      testDbSuperuserPassword,
+    });
   });
 
+  afterAll(async () => {
+    await spawnProcess?.kill("SIGTERM");
+    spawnProcess = undefined;
+  });
+
+  beforeEach(async () => {
+    await clearSpecifiedDatabase({
+      testDbUrl,
+      testDbSuperuserEmail,
+      testDbSuperuserPassword,
+    });
+  });
   it(`allows user to create an organisation note record if;
       - admin orgUserPermission
   `, async () => {
@@ -161,10 +199,6 @@ describe(`organisation notes collection create rules - happy path`, () => {
       );
     expect(organisationNoteRecordResp2).toBeTruthy();
   });
-});
-
-describe(`organisation notes collection create rules - unhappy paths`, () => {
-  beforeEach(async () => await clearDatabase());
 
   it(`denies user to create an organisation note record if;
       - standard orgUserPermission record

@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { PocketBase, userPb } from "../../config/pocketbaseConfig";
+import { PocketBase } from "../../config/pocketbaseConfig";
 import {
   globalUserPermissionsCollectionName,
   usersCollectionName,

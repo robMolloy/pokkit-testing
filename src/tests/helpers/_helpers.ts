@@ -89,7 +89,6 @@ export const setupAndServeTestDb = async (p: {
   const tempTestFilePath = `${p.testDirPath}/${pocketbaseBuildFileName}`;
 
   const testDbPortNumber = p.testDbUrl.split(":").slice(-1)[0];
-  console.log(`src/tests/helpers/_helpers.ts:${/*LL*/ 92}`, testDbPortNumber);
   if (!testDbPortNumber) return;
 
   await p.spawnProcess?.kill("SIGTERM");
