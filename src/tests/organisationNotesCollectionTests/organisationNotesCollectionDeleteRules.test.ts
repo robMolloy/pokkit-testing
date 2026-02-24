@@ -19,7 +19,7 @@ import { parsedEnv } from "../helpers/testEnvHelpers";
 // deleteRule: @request.auth.id != "" && @collection.organisationUserPermissions.userId ?= @request.auth.id && @collection.organisationUserPermissions.organisationId ?= organisationId && @collection.organisationUserPermissions.role ?= "admin"
 
 const pocketbaseBuildFilePath = `pocketbase/app-db/builds/app-db`;
-const testDirPath = `_temp/testTemp`;
+const testDirPath = `_temp/organisationNotesCollectionDeleteRules`;
 
 const appDbUrl = "http://0.0.0.0:8090";
 const appDbSuperuserEmail = "admin@admin.com";

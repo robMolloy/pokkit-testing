@@ -9,12 +9,12 @@ import { clearSpecifiedDatabase } from "../helpers/pocketbaseTestHelpers";
 // id = @request.auth.id
 
 const pocketbaseBuildFilePath = `pocketbase/app-db/builds/app-db`;
-const testDirPath = `_temp/usersCollectionDeleteRules`;
+const testDirPath = `_temp/usersCollectionUpdateRules`;
 
 const appDbUrl = "http://0.0.0.0:8090";
 const appDbSuperuserEmail = "admin@admin.com";
 const appDbSuperuserPassword = "admin@admin.com";
-const testDbUrl = `http://0.0.0.0:8091`;
+const testDbUrl = `http://0.0.0.0:8105`;
 const testDbSuperuserEmail = "admin@admin.com";
 const testDbSuperuserPassword = "admin@admin.com";
 

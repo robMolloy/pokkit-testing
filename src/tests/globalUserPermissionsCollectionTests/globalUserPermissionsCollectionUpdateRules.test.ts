@@ -1,24 +1,62 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { superuserPb, userPb } from "../../config/pocketbaseConfig";
+import type { ChildProcessWithoutNullStreams } from "child_process";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { PocketBase } from "../../config/pocketbaseConfig";
+import { setupAndServeTestDb } from "../helpers/_helpers";
+import { createGlobalUserPermissionRecordSeedData } from "../helpers/globalUserPermissionHelpers";
 import {
   globalUserPermissionsCollectionName,
   superusersCollectionName,
   usersCollectionName,
 } from "../helpers/pocketbaseMetadata";
-import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
+import { clearSpecifiedDatabase } from "../helpers/pocketbaseTestHelpers";
 import { createUserEmailPasswordData, createUserRecord } from "../helpers/pocketbaseUserHelpers";
-import { createGlobalUserPermissionRecordSeedData } from "../helpers/globalUserPermissionHelpers";
 
 // updateRule: @request.auth.id != "" && @collection.globalUserPermissions.id ?= @request.auth.id && @collection.globalUserPermissions.role ?= "admin"
 // Standard: @request.auth.id != "" && @request.auth.id = id
 // Admin:    @collection.globalUserPermissions.id ?= @request.auth.id && @collection.globalUserPermissions.role ?= "admin"
 
+const pocketbaseBuildFilePath = `pocketbase/app-db/builds/app-db`;
+const testDirPath = `_temp/globalUserPermissionsCollectionUpdateRules`;
+
+const appDbUrl = "http://0.0.0.0:8090";
+const appDbSuperuserEmail = "admin@admin.com";
+const appDbSuperuserPassword = "admin@admin.com";
+const testDbUrl = `http://0.0.0.0:8064`;
+const testDbSuperuserEmail = "admin@admin.com";
+const testDbSuperuserPassword = "admin@admin.com";
+
+const createPbInstance = () => new PocketBase(testDbUrl);
+
+let spawnProcess: ChildProcessWithoutNullStreams | undefined;
+
 describe(`PocketBase globalUserPermissions collection view rules as standard user`, () => {
+  beforeAll(async () => {
+    spawnProcess = await setupAndServeTestDb({
+      spawnProcess,
+      pocketbaseBuildFilePath,
+      testDirPath,
+      appDbUrl,
+      appDbSuperuserEmail,
+      appDbSuperuserPassword,
+      testDbUrl,
+      testDbSuperuserEmail,
+      testDbSuperuserPassword,
+    });
+  });
+
+  afterAll(async () => {
+    await spawnProcess?.kill("SIGTERM");
+    spawnProcess = undefined;
+  });
+
   beforeEach(async () => {
-    await clearDatabase();
+    await clearSpecifiedDatabase({ testDbUrl, testDbSuperuserEmail, testDbSuperuserPassword });
   });
 
   it("denies standard user to update a globalUserPermissions record for an existing user if the user has a non admin globalPermissionRecord", async () => {
+    const superuserPb = createPbInstance();
+    const userPb = createPbInstance();
+
     // throwaway record - first user gains an approved admin global permission
     await createUserRecord({ pb: userPb });
 
@@ -69,6 +107,8 @@ describe(`PocketBase globalUserPermissions collection view rules as standard use
   });
 
   it("denies standard user to update a globalUserPermissions record for an existing user if the user is missing a globalPermission record", async () => {
+    const userPb = createPbInstance();
+
     // throwaway record - first user gains an approved admin global permission
     await createUserRecord({ pb: userPb });
 
@@ -107,14 +147,10 @@ describe(`PocketBase globalUserPermissions collection view rules as standard use
         .update(user2Record.id, { status: "blocked" }),
     ).rejects.toThrow();
   });
-});
-
-describe(`PocketBase user collection view rules as admin user`, () => {
-  beforeEach(async () => {
-    await clearDatabase();
-  });
 
   it("allows admin user to update a globalUserPermissions record for an existing user", async () => {
+    const superuserPb = createPbInstance();
+    const userPb = createPbInstance();
     // throwaway record - first user gains an approved admin global permission
     await createUserRecord({ pb: userPb });
 

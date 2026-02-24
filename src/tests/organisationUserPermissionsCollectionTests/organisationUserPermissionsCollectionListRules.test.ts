@@ -18,12 +18,12 @@ import { parsedEnv } from "../helpers/testEnvHelpers";
 // Admin:    @collection.globalUserPermissions.id ?= @request.auth.id && @collection.globalUserPermissions.role ?= "admin"
 
 const pocketbaseBuildFilePath = `pocketbase/app-db/builds/app-db`;
-const testDirPath = `_temp/organisationsUserPermissionsCollectionCreateRules`;
+const testDirPath = `_temp/organisationsUserPermissionsCollectionListRules`;
 
 const appDbUrl = "http://0.0.0.0:8090";
 const appDbSuperuserEmail = "admin@admin.com";
 const appDbSuperuserPassword = "admin@admin.com";
-const testDbUrl = `http://0.0.0.0:8091`;
+const testDbUrl = `http://0.0.0.0:8093`;
 const testDbSuperuserEmail = "admin@admin.com";
 const testDbSuperuserPassword = "admin@admin.com";
 

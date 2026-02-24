@@ -19,7 +19,7 @@ import { parsedEnv } from "../helpers/testEnvHelpers";
 // updateRule: @request.auth.id != "" && @collection.organisationUserPermissions.userId ?= @request.auth.id && @collection.organisationUserPermissions.organisationId ?= organisationId && (@collection.organisationUserPermissions.role ?= "admin" ||  @collection.organisationUserPermissions.role ?= "standard")
 
 const pocketbaseBuildFilePath = `pocketbase/app-db/builds/app-db`;
-const testDirPath = `_temp/testTemp`;
+const testDirPath = `_temp/organisationNotesCollectionUpdateRules`;
 
 const appDbUrl = "http://0.0.0.0:8090";
 const appDbSuperuserEmail = "admin@admin.com";

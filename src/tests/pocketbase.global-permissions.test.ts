@@ -1,18 +1,55 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { clearDatabase } from "./helpers/pocketbaseTestHelpers";
-import { userPb } from "../config/pocketbaseConfig";
+import type { ChildProcessWithoutNullStreams } from "child_process";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { PocketBase } from "../config/pocketbaseConfig";
+import { setupAndServeTestDb } from "./helpers/_helpers";
 import {
   globalUserPermissionsCollectionName,
   usersCollectionName,
 } from "./helpers/pocketbaseMetadata";
+import { clearSpecifiedDatabase } from "./helpers/pocketbaseTestHelpers";
 import { createUserEmailPasswordData } from "./helpers/pocketbaseUserHelpers";
 
+const pocketbaseBuildFilePath = `pocketbase/app-db/builds/app-db`;
+const testDirPath = `_temp/pocketbase-globalPermissions`;
+
+const appDbUrl = "http://0.0.0.0:8090";
+const appDbSuperuserEmail = "admin@admin.com";
+const appDbSuperuserPassword = "admin@admin.com";
+const testDbUrl = `http://0.0.0.0:8112`;
+const testDbSuperuserEmail = "admin@admin.com";
+const testDbSuperuserPassword = "admin@admin.com";
+
+const createPbInstance = () => new PocketBase(testDbUrl);
+
+let spawnProcess: ChildProcessWithoutNullStreams | undefined;
+
 describe("PocketBase users collection global permissions", () => {
+  beforeAll(async () => {
+    spawnProcess = await setupAndServeTestDb({
+      spawnProcess,
+      pocketbaseBuildFilePath,
+      testDirPath,
+      appDbUrl,
+      appDbSuperuserEmail,
+      appDbSuperuserPassword,
+      testDbUrl,
+      testDbSuperuserEmail,
+      testDbSuperuserPassword,
+    });
+  });
+
+  afterAll(async () => {
+    await spawnProcess?.kill("SIGTERM");
+    spawnProcess = undefined;
+  });
+
   beforeEach(async () => {
-    await clearDatabase();
+    await clearSpecifiedDatabase({ testDbUrl, testDbSuperuserEmail, testDbSuperuserPassword });
   });
 
   it.only("allow create and read: first user receives approved admin global permission", async () => {
+    const userPb = createPbInstance();
+
     const { email, password } = createUserEmailPasswordData();
     const userRecord = await userPb.collection(usersCollectionName).create({
       email,
