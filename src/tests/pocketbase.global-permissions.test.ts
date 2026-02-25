@@ -8,6 +8,7 @@ import {
 } from "./helpers/pocketbaseMetadata";
 import { clearDatabase } from "./helpers/pocketbaseTestHelpers";
 import { createUserEmailPasswordData } from "./helpers/pocketbaseUserHelpers";
+import fse from "fs-extra";
 
 const pocketbaseBuildFilePath = `pocketbase/app-db/builds/app-db`;
 const testDirPath = `_temp/pocketbase-globalPermissions`;
@@ -41,6 +42,7 @@ describe("PocketBase users collection global permissions", () => {
   afterAll(async () => {
     await spawnProcess?.kill("SIGTERM");
     spawnProcess = undefined;
+    fse.removeSync(testDirPath);
   });
 
   beforeEach(async () => {

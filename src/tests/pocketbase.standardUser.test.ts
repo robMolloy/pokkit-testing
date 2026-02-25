@@ -5,6 +5,7 @@ import { setupAndServeTestDb } from "./helpers/_helpers";
 import { usersCollectionName } from "./helpers/pocketbaseMetadata";
 import { clearDatabase } from "./helpers/pocketbaseTestHelpers";
 import { createUserEmailPasswordData, createUserRecord } from "./helpers/pocketbaseUserHelpers";
+import fse from "fs-extra";
 
 const pocketbaseBuildFilePath = `pocketbase/app-db/builds/app-db`;
 const testDirPath = `_temp/pocketbase-standardUser`;
@@ -38,6 +39,7 @@ describe("PocketBase users collection rules", () => {
   afterAll(async () => {
     await spawnProcess?.kill("SIGTERM");
     spawnProcess = undefined;
+    fse.removeSync(testDirPath);
   });
 
   beforeEach(async () => {

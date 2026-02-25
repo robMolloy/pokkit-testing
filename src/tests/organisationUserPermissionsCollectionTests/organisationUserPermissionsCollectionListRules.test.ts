@@ -12,6 +12,7 @@ import {
 import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
 import { createUserEmailPasswordData } from "../helpers/pocketbaseUserHelpers";
 import { parsedEnv } from "../helpers/testEnvHelpers";
+import fse from "fs-extra";
 
 // createRule: @request.auth.id != "" && @collection.globalUserPermissions.id ?= @request.auth.id && @collection.globalUserPermissions.role ?= "admin"
 // Standard: @request.auth.id != "" && @request.auth.id = id
@@ -49,6 +50,7 @@ describe(`organisation user permissions collection list rules - unhappy and happ
   afterAll(async () => {
     await spawnProcess?.kill("SIGTERM");
     spawnProcess = undefined;
+    fse.removeSync(testDirPath);
   });
 
   beforeEach(async () => {

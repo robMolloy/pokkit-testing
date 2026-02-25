@@ -6,6 +6,7 @@ import { createOrganisationRecordSeedData } from "../helpers/organisationsCollec
 import { organisationsCollectionName, usersCollectionName } from "../helpers/pocketbaseMetadata";
 import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
 import { createUserEmailPasswordData } from "../helpers/pocketbaseUserHelpers";
+import fse from "fs-extra";
 
 // createRule: @request.auth.id != "" && @collection.globalUserPermissions.id ?= @request.auth.id && @collection.globalUserPermissions.role ?= "admin"
 // Standard: @request.auth.id != "" && @request.auth.id = id
@@ -43,6 +44,7 @@ describe(`organisations collection list rules for logged out/in user`, () => {
   afterAll(async () => {
     await spawnProcess?.kill("SIGTERM");
     spawnProcess = undefined;
+    fse.removeSync(testDirPath);
   });
 
   beforeEach(async () => {

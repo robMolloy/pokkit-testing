@@ -13,6 +13,7 @@ import {
 import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
 import { userSeedFactory } from "../helpers/pocketbaseUserHelpers";
 import { parsedEnv } from "../helpers/testEnvHelpers";
+import fse from "fs-extra";
 
 // deleteRule: @request.auth.id != "" && @collection.organisationUserPermissions.userId ?= @request.auth.id && @collection.organisationUserPermissions.organisationId ?= organisationId && @collection.organisationUserPermissions.role ?= "admin" && @collection.organisationUserPermissions.status ?= "approved"
 
@@ -138,6 +139,7 @@ describe(`organisation user permissions collection update rules - unhappy and ha
   afterAll(async () => {
     await spawnProcess?.kill("SIGTERM");
     spawnProcess = undefined;
+    fse.removeSync(testDirPath);
   });
 
   beforeEach(async () => {

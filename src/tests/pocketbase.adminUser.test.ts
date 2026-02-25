@@ -10,6 +10,7 @@ import {
 import { clearDatabase } from "./helpers/pocketbaseTestHelpers";
 import { createUserEmailPasswordData, createUserRecord } from "./helpers/pocketbaseUserHelpers";
 import { parsedEnv } from "./helpers/testEnvHelpers";
+import fse from "fs-extra";
 
 const pocketbaseBuildFilePath = `pocketbase/app-db/builds/app-db`;
 const testDirPath = `_temp/pocketbase-adminUser`;
@@ -43,6 +44,7 @@ describe("PocketBase admin users collection rules", () => {
   afterAll(async () => {
     await spawnProcess?.kill("SIGTERM");
     spawnProcess = undefined;
+    fse.removeSync(testDirPath);
   });
 
   beforeEach(async () => {

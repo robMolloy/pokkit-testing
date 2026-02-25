@@ -10,6 +10,7 @@ import {
 } from "../helpers/pocketbaseMetadata";
 import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
 import { createUserEmailPasswordData, createUserRecord } from "../helpers/pocketbaseUserHelpers";
+import fse from "fs-extra";
 
 // deleteRule: @request.auth.id != "" && @collection.globalUserPermissions.id ?= @request.auth.id && @collection.globalUserPermissions.role ?= "admin"
 // Standard: @request.auth.id != "" && @request.auth.id = id
@@ -47,6 +48,7 @@ describe(`PocketBase globalUserPermissions collection delete rules as standard u
   afterAll(async () => {
     await spawnProcess?.kill("SIGTERM");
     spawnProcess = undefined;
+    fse.removeSync(testDirPath);
   });
 
   beforeEach(async () => {

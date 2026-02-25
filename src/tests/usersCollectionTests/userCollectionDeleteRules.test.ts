@@ -5,6 +5,7 @@ import { setupAndServeTestDb } from "../helpers/_helpers";
 import { usersCollectionName } from "../helpers/pocketbaseMetadata";
 import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
 import { createUserEmailPasswordData, createUserRecord } from "../helpers/pocketbaseUserHelpers";
+import fse from "fs-extra";
 
 // id = @request.auth.id
 
@@ -40,6 +41,7 @@ describe(`PocketBase user collection delete rules as user`, () => {
   afterAll(async () => {
     await spawnProcess?.kill("SIGTERM");
     spawnProcess = undefined;
+    fse.removeSync(testDirPath);
   });
 
   beforeEach(async () => {

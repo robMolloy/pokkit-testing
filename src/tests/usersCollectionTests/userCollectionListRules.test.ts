@@ -9,6 +9,7 @@ import { createUserEmailPasswordData, createUserRecord } from "../helpers/pocket
 
 import { type ChildProcessWithoutNullStreams } from "child_process";
 import { setupAndServeTestDb } from "../helpers/_helpers";
+import fse from "fs-extra";
 
 // @request.auth.id = id || @collection.globalUserPermissions.userId ?= @request.auth.id && @collection.globalUserPermissions.role = "admin"
 // Standard: @request.auth.id = id
@@ -43,6 +44,7 @@ describe(`PocketBase user collection list rules as standard user`, () => {
   afterAll(async () => {
     await spawnProcess?.kill("SIGTERM");
     spawnProcess = undefined;
+    fse.removeSync(testDirPath);
   });
 
   beforeEach(async () => {

@@ -15,6 +15,7 @@ import {
 import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
 import { userSeedFactory } from "../helpers/pocketbaseUserHelpers";
 import { parsedEnv } from "../helpers/testEnvHelpers";
+import fse from "fs-extra";
 
 // updateRule: @request.auth.id != "" && @collection.organisationUserPermissions.userId ?= @request.auth.id && @collection.organisationUserPermissions.organisationId ?= organisationId && (@collection.organisationUserPermissions.role ?= "admin" ||  @collection.organisationUserPermissions.role ?= "standard")
 
@@ -176,6 +177,7 @@ describe(`organisation notes collection update rules - happy and unhappy paths`,
   afterAll(async () => {
     await spawnProcess?.kill("SIGTERM");
     spawnProcess = undefined;
+    fse.removeSync(testDirPath);
   });
 
   beforeEach(async () => {

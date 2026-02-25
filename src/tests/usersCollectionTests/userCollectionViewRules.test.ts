@@ -8,6 +8,7 @@ import {
 } from "../helpers/pocketbaseMetadata";
 import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
 import { createUserEmailPasswordData, createUserRecord } from "../helpers/pocketbaseUserHelpers";
+import fse from "fs-extra";
 
 // @request.auth.id = id || @collection.globalUserPermissions.userId ?= @request.auth.id && @collection.globalUserPermissions.role = "admin"
 // Standard: @request.auth.id = id
@@ -45,6 +46,7 @@ describe(`PocketBase user collection view rules as standard user`, () => {
   afterAll(async () => {
     await spawnProcess?.kill("SIGTERM");
     spawnProcess = undefined;
+    fse.removeSync(testDirPath);
   });
 
   beforeEach(async () => {
