@@ -85,10 +85,17 @@ export const setupAndServeTestDb = async (p: {
   testDbSuperuserEmail: string;
   testDbSuperuserPassword: string;
 }) => {
-  const pocketbaseBuildFileName = p.pocketbaseBuildFilePath.split("/").slice(-1)[0];
+  const pocketbaseBuildFileName = p.pocketbaseBuildFilePath
+    .split("/")
+    .filter((x) => !!x)
+    .slice(-1)[0]!;
   const tempTestFilePath = `${p.testDirPath}/${pocketbaseBuildFileName}`;
 
-  const testDbPortNumber = p.testDbUrl.split(":").slice(-1)[0];
+  const testDbPortNumber = p.testDbUrl
+    .split(":")
+    .filter((x) => !!x)
+    .slice(-1)[0]
+    ?.replace(/\D+/g, "");
   if (!testDbPortNumber) return;
 
   await p.spawnProcess?.kill("SIGTERM");
