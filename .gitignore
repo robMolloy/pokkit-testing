@@ -26,6 +26,8 @@ dist-ssr
 pocketbase/app-db/pb_data/*.*
 pocketbase/app-db/pb_data/logs/
 pocketbase/app-db/pb_data/storage/
+!pocketbase/app-db/pb_data/auxiliary.db
+!pocketbase/app-db/pb_data/data.db
 pocketbase/app-db/pb_data/backups/*_test.zip
 pocketbase/app-db/pb_data/backups/*_test.zip*
 
