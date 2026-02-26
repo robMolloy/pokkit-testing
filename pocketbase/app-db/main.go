@@ -90,6 +90,86 @@ func main() {
 		return e.Next()
 	})
 
+	// app.OnRecordCreate("organisationDocuments").BindFunc(func(e *pbCore.RecordEvent) error {
+	// 	orgDocRecord := e.Record
+
+	// 	unsavedFiles := orgDocRecord.GetUnsavedFiles("file")
+	// 	unsavedFile := unsavedFiles[0]
+	// 	orgDocRecord.Set("fileName", unsavedFile.OriginalName)
+	// 	orgDocRecord.Set("fileSizeBytes", unsavedFile.Size)
+
+	// 	// return e.Next()
+	// 	e.Next()
+
+	// 	if orgDocRecord.Get("id") == nil {
+	// 		return e.Next()
+	// 	}
+
+	// 	organisationDocumentVersionsCollection, err := e.App.FindCollectionByNameOrId(
+	// 		"organisationDocumentVersions",
+	// 	)
+	// 	if err != nil {
+	// 		log.Printf("Error finding organisationDocumentVersions collection: %v\n", err)
+	// 		return e.Next()
+	// 	}
+
+	// 	fmt.Println()
+
+	// 	organisationDocumentVersionRecord := pbCore.NewRecord(organisationDocumentVersionsCollection)
+	// 	organisationDocumentVersionRecord.Set("versionNumber", orgDocRecord.Get("versionNumber"))
+	// 	organisationDocumentVersionRecord.Set("file", orgDocRecord.Get("file"))
+	// 	organisationDocumentVersionRecord.Set("fileName", orgDocRecord.Get("fileName"))
+	// 	organisationDocumentVersionRecord.Set("fileSizeBytes", orgDocRecord.Get("fileSizeBytes"))
+	// 	organisationDocumentVersionRecord.Set("organisationId", orgDocRecord.Get("organisationId"))
+	// 	organisationDocumentVersionRecord.Set("organisationDocumentId", orgDocRecord.Get("id"))
+
+	// 	return e.App.Save(organisationDocumentVersionRecord)
+	// })
+
+	app.OnRecordCreate("organisationDocuments").BindFunc(func(e *pbCore.RecordEvent) error {
+		orgDocRecord := e.Record
+
+		unsavedFiles := orgDocRecord.GetUnsavedFiles("file")
+		unsavedFile := unsavedFiles[0]
+		orgDocRecord.Set("versionNumber", 1)
+		orgDocRecord.Set("fileName", unsavedFile.OriginalName)
+		orgDocRecord.Set("fileSizeBytes", unsavedFile.Size)
+
+		e.Next()
+
+		if orgDocRecord.Get("id") == nil {
+			return e.Next()
+		}
+
+		fmt.Println(orgDocRecord.Get("id"))
+		fmt.Println(orgDocRecord.Get("file"))
+		fmt.Println(unsavedFile)
+		fmt.Println(orgDocRecord.Get("fileName"))
+		fmt.Println(orgDocRecord.Get("fileSizeBytes"))
+		fmt.Println(orgDocRecord.Get("versionNumber"))
+		fmt.Println(orgDocRecord.Get("organisationId"))
+
+		organisationDocumentVersionsCollection, err := e.App.FindCollectionByNameOrId(
+			"organisationDocumentVersions",
+		)
+		if err != nil {
+			log.Printf("Error finding organisationDocumentVersions collection: %v\n", err)
+			return e.Next()
+		}
+
+		organisationDocumentVersionRecord := pbCore.NewRecord(organisationDocumentVersionsCollection)
+
+		organisationDocumentVersionRecord.Set("versionNumber", orgDocRecord.Get("versionNumber"))
+		organisationDocumentVersionRecord.Set("file", unsavedFile)
+		organisationDocumentVersionRecord.Set("fileName", orgDocRecord.Get("fileName"))
+		organisationDocumentVersionRecord.Set("fileSizeBytes", orgDocRecord.Get("fileSizeBytes"))
+		organisationDocumentVersionRecord.Set("organisationId", orgDocRecord.Get("organisationId"))
+		organisationDocumentVersionRecord.Set("organisationDocumentId", orgDocRecord.Get("id"))
+		organisationDocumentVersionRecord.Set("docIdVersionNumberKey", fmt.Sprintf("%s-%s", orgDocRecord.Get("id"), orgDocRecord.Get("versionNumber")))
+
+		return e.App.Save(organisationDocumentVersionRecord)
+	})
+
 	if err := app.Start(); err != nil {
 		log.Fatal(err)
 	}

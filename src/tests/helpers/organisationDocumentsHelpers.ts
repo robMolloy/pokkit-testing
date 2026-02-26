@@ -1,3 +1,3 @@
 export const organisationDocumentSeedFactory = {
-  forCreate: (p: { organisationId: string }) => p,
+  forCreate: (p: { file: File; organisationId: string }) => p,
 };

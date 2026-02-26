@@ -1,4 +1,5 @@
-import type { ChildProcessWithoutNullStreams } from "child_process";
+import { type ChildProcessWithoutNullStreams } from "child_process";
+import fse from "fs-extra";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { PocketBase } from "../../config/pocketbaseConfig";
 import { setupAndServeTestDb } from "../helpers/_helpers";
@@ -145,6 +146,11 @@ const setupOrgDocumentRecordsForCreateTests = async () => {
 
 let spawnProcess: ChildProcessWithoutNullStreams | undefined;
 
+const getImageFile = async () => {
+  const resp = fse.readFileSync("src/tests/organisationDocumentVersionTests/images.png");
+  return new File([resp], "images.png", { type: "image/png" });
+};
+
 describe(`organisation documents collection create rules - happy and unhappy paths`, () => {
   beforeAll(async () => {
     spawnProcess = await setupAndServeTestDb({
@@ -163,6 +169,7 @@ describe(`organisation documents collection create rules - happy and unhappy pat
   afterAll(async () => {
     await spawnProcess?.kill("SIGTERM");
     spawnProcess = undefined;
+    fse.removeSync(testDirPath);
   });
 
   beforeEach(async () => {
@@ -176,13 +183,14 @@ describe(`organisation documents collection create rules - happy and unhappy pat
   it(`allows user to create an organisation document record if;
       - admin orgUserPermission
   `, async () => {
-    const { globalAndOrgAdminUserPb, orgAdminUserPb, organisationRecord } =
+    const { globalAndOrgAdminUserPb, orgAdminUserPb, organisationRecord, superuserPb } =
       await setupOrgDocumentRecordsForCreateTests();
 
     const organisationDocumentRecordResp1 = await globalAndOrgAdminUserPb
       .collection(organisationDocumentsCollectionName)
       .create(
         organisationDocumentSeedFactory.forCreate({
+          file: await getImageFile(),
           organisationId: organisationRecord.id,
         }),
       );
@@ -192,9 +200,96 @@ describe(`organisation documents collection create rules - happy and unhappy pat
       .collection(organisationDocumentsCollectionName)
       .create(
         organisationDocumentSeedFactory.forCreate({
+          file: await getImageFile(),
           organisationId: organisationRecord.id,
         }),
       );
     expect(organisationDocumentRecordResp2).toBeTruthy();
+
+    const records = await superuserPb.collection(organisationDocumentsCollectionName).getFullList();
+    expect(records.map((doc) => doc.fileName)).toEqual(["images.png", "images.png"]);
+  });
+
+  it(`denies user to create an organisation document record if;
+      - no file provided in payload
+  `, async () => {
+    const { globalAndOrgAdminUserPb, orgAdminUserPb, organisationRecord } =
+      await setupOrgDocumentRecordsForCreateTests();
+
+    const organisationDocumentRecordResp1 = await globalAndOrgAdminUserPb
+      .collection(organisationDocumentsCollectionName)
+      .create(
+        organisationDocumentSeedFactory.forCreate({
+          file: await getImageFile(),
+          organisationId: organisationRecord.id,
+        }),
+      );
+    expect(organisationDocumentRecordResp1).toBeTruthy();
+
+    await expect(
+      orgAdminUserPb.collection(organisationDocumentsCollectionName).create(
+        // @ts-expect-error
+        organisationDocumentSeedFactory.forCreate({ file: await getImageFile() }),
+      ),
+    ).rejects.toThrow();
+  });
+
+  it(`denies user to create an organisation document record if;
+      - no file provided in payload
+  `, async () => {
+    const { globalAndOrgAdminUserPb, orgAdminUserPb, organisationRecord } =
+      await setupOrgDocumentRecordsForCreateTests();
+
+    const organisationDocumentRecordResp1 = await globalAndOrgAdminUserPb
+      .collection(organisationDocumentsCollectionName)
+      .create(
+        organisationDocumentSeedFactory.forCreate({
+          file: await getImageFile(),
+          organisationId: organisationRecord.id,
+        }),
+      );
+    expect(organisationDocumentRecordResp1).toBeTruthy();
+
+    await expect(
+      orgAdminUserPb.collection(organisationDocumentsCollectionName).create(
+        // @ts-expect-error
+        organisationDocumentSeedFactory.forCreate({ organisationId: organisationRecord.id }),
+      ),
+    ).rejects.toThrow();
+  });
+
+  it(`denies user to create an organisation document record if;
+      - standard orgUserPermission record
+  `, async () => {
+    const { orgStandardUserPb, organisationRecord } = await setupOrgDocumentRecordsForCreateTests();
+
+    await expect(
+      orgStandardUserPb.collection(organisationDocumentsCollectionName).create(
+        organisationDocumentSeedFactory.forCreate({
+          file: await getImageFile(),
+          organisationId: organisationRecord.id,
+        }),
+      ),
+    ).rejects.toThrow();
+  });
+
+  it(`denies user to create an organisation document record if;
+      - no orgUserPermission record
+  `, async () => {
+    const { orgStandardUserPb, organisationRecord, orgStandardUserPermissionsRecord, superuserPb } =
+      await setupOrgDocumentRecordsForCreateTests();
+
+    await superuserPb
+      .collection(organisationUserPermissionsCollectionName)
+      .delete(orgStandardUserPermissionsRecord.id);
+
+    await expect(
+      orgStandardUserPb.collection(organisationDocumentsCollectionName).create(
+        organisationDocumentSeedFactory.forCreate({
+          file: new File([""], "filename.txt"),
+          organisationId: organisationRecord.id,
+        }),
+      ),
+    ).rejects.toThrow();
   });
 });
