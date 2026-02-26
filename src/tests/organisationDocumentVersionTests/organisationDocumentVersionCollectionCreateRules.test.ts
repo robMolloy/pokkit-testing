@@ -34,10 +34,6 @@ const getImage1File = async () => {
   const resp = fse.readFileSync("src/tests/organisationDocumentVersionTests/image1.png");
   return new File([resp], "image1.png", { type: "image/png" });
 };
-// const getImage2File = async () => {
-//   const resp = fse.readFileSync("src/tests/organisationDocumentVersionTests/image2.png");
-//   return new File([resp], "image2.png", { type: "image/png" });
-// };
 
 const setupOrgDocumentRecordsForCreateTests = async () => {
   const superuserPb = createPbInstance();
@@ -215,6 +211,6 @@ describe(`organisation documents collection create rules - happy and unhappy pat
       .collection(organisationDocumentVersionsCollectionName)
       .getFullList();
 
-    expect(orgDocVersionRecords.map((x) => x.fileName)).toEqual(["images.png", "images.png"]);
+    expect(orgDocVersionRecords.map((x) => x.fileName)).toEqual(["image1.png", "image1.png"]);
   });
 });
