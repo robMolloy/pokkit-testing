@@ -146,9 +146,9 @@ const setupOrgDocumentRecordsForCreateTests = async () => {
 
 let spawnProcess: ChildProcessWithoutNullStreams | undefined;
 
-const getImageFile = async () => {
-  const resp = fse.readFileSync("src/tests/organisationDocumentVersionTests/images.png");
-  return new File([resp], "images.png", { type: "image/png" });
+const getImage1File = async () => {
+  const resp = fse.readFileSync("src/tests/organisationDocumentVersionTests/image1.png");
+  return new File([resp], "image1.png", { type: "image/png" });
 };
 
 describe(`organisation documents collection create rules - happy and unhappy paths`, () => {
@@ -190,7 +190,7 @@ describe(`organisation documents collection create rules - happy and unhappy pat
       .collection(organisationDocumentsCollectionName)
       .create(
         organisationDocumentSeedFactory.forCreate({
-          file: await getImageFile(),
+          file: await getImage1File(),
           organisationId: organisationRecord.id,
         }),
       );
@@ -200,14 +200,14 @@ describe(`organisation documents collection create rules - happy and unhappy pat
       .collection(organisationDocumentsCollectionName)
       .create(
         organisationDocumentSeedFactory.forCreate({
-          file: await getImageFile(),
+          file: await getImage1File(),
           organisationId: organisationRecord.id,
         }),
       );
     expect(organisationDocumentRecordResp2).toBeTruthy();
 
     const records = await superuserPb.collection(organisationDocumentsCollectionName).getFullList();
-    expect(records.map((doc) => doc.fileName)).toEqual(["images.png", "images.png"]);
+    expect(records.map((doc) => doc.fileName)).toEqual(["image1.png", "image1.png"]);
   });
 
   it(`denies user to create an organisation document record if;
@@ -220,7 +220,7 @@ describe(`organisation documents collection create rules - happy and unhappy pat
       .collection(organisationDocumentsCollectionName)
       .create(
         organisationDocumentSeedFactory.forCreate({
-          file: await getImageFile(),
+          file: await getImage1File(),
           organisationId: organisationRecord.id,
         }),
       );
@@ -244,7 +244,7 @@ describe(`organisation documents collection create rules - happy and unhappy pat
       .collection(organisationDocumentsCollectionName)
       .create(
         organisationDocumentSeedFactory.forCreate({
-          file: await getImageFile(),
+          file: await getImage1File(),
           organisationId: organisationRecord.id,
         }),
       );
@@ -266,7 +266,7 @@ describe(`organisation documents collection create rules - happy and unhappy pat
     await expect(
       orgStandardUserPb.collection(organisationDocumentsCollectionName).create(
         organisationDocumentSeedFactory.forCreate({
-          file: await getImageFile(),
+          file: await getImage1File(),
           organisationId: organisationRecord.id,
         }),
       ),
@@ -286,7 +286,7 @@ describe(`organisation documents collection create rules - happy and unhappy pat
     await expect(
       orgStandardUserPb.collection(organisationDocumentsCollectionName).create(
         organisationDocumentSeedFactory.forCreate({
-          file: new File([""], "filename.txt"),
+          file: await getImage1File(),
           organisationId: organisationRecord.id,
         }),
       ),
