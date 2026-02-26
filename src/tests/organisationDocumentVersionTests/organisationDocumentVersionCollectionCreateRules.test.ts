@@ -30,6 +30,15 @@ const testDbSuperuserPassword = "admin@admin.com";
 
 const createPbInstance = () => new PocketBase(testDbUrl);
 
+const getImage1File = async () => {
+  const resp = fse.readFileSync("src/tests/organisationDocumentVersionTests/image1.png");
+  return new File([resp], "image1.png", { type: "image/png" });
+};
+// const getImage2File = async () => {
+//   const resp = fse.readFileSync("src/tests/organisationDocumentVersionTests/image2.png");
+//   return new File([resp], "image2.png", { type: "image/png" });
+// };
+
 const setupOrgDocumentRecordsForCreateTests = async () => {
   const superuserPb = createPbInstance();
   await superuserPb
@@ -147,11 +156,6 @@ const setupOrgDocumentRecordsForCreateTests = async () => {
 
 let spawnProcess: ChildProcessWithoutNullStreams | undefined;
 
-const getImageFile = async () => {
-  const resp = fse.readFileSync("src/tests/organisationDocumentTests/images.png");
-  return new File([resp], "images.png", { type: "image/png" });
-};
-
 describe(`organisation documents collection create rules - happy and unhappy paths`, () => {
   beforeAll(async () => {
     spawnProcess = await setupAndServeTestDb({
@@ -191,7 +195,7 @@ describe(`organisation documents collection create rules - happy and unhappy pat
       .collection(organisationDocumentsCollectionName)
       .create(
         organisationDocumentSeedFactory.forCreate({
-          file: await getImageFile(),
+          file: await getImage1File(),
           organisationId: organisationRecord.id,
         }),
       );
@@ -201,7 +205,7 @@ describe(`organisation documents collection create rules - happy and unhappy pat
       .collection(organisationDocumentsCollectionName)
       .create(
         organisationDocumentSeedFactory.forCreate({
-          file: await getImageFile(),
+          file: await getImage1File(),
           organisationId: organisationRecord.id,
         }),
       );
