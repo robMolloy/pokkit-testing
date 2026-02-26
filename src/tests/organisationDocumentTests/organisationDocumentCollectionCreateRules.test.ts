@@ -229,7 +229,7 @@ describe(`organisation documents collection create rules - happy and unhappy pat
     await expect(
       orgAdminUserPb.collection(organisationDocumentsCollectionName).create(
         // @ts-expect-error
-        organisationDocumentSeedFactory.forCreate({ file: await getImageFile() }),
+        organisationDocumentSeedFactory.forCreate({ file: await getImage1File() }),
       ),
     ).rejects.toThrow();
   });
