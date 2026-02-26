@@ -74,8 +74,10 @@ const getCollectionsFromDb = async (p: {
   await testPb.collections.import(collections);
 };
 
-export const setupAndServeTestDb = async (p: {
-  spawnProcess: ChildProcessWithoutNullStreams | undefined;
+type TSetupAndServeTestDbFromRunningInstance = Parameters<
+  typeof setupAndServeTestDbFromRunningInstance
+>[0];
+export const setupAndServeTestDbFromRunningInstance = async (p: {
   pocketbaseBuildFilePath: string;
   appDbUrl: string;
   appDbSuperuserEmail: string;
@@ -98,7 +100,6 @@ export const setupAndServeTestDb = async (p: {
     ?.replace(/\D+/g, "");
   if (!testDbPortNumber) return;
 
-  await p.spawnProcess?.kill("SIGTERM");
   // deleteTempTestDir
   fse.removeSync(p.testDirPath);
 
@@ -125,4 +126,21 @@ export const setupAndServeTestDb = async (p: {
   });
 
   return pbProcess;
+};
+export const setupAndServeTestDbFromRunningInstanceWithDefaults = async (
+  p: {
+    testDbUrl: string;
+    testDirPath: string;
+  } & Partial<Omit<TSetupAndServeTestDbFromRunningInstance, "testDirPath" | "testDbUrl">>,
+) => {
+  return setupAndServeTestDbFromRunningInstance({
+    testDbUrl: p.testDbUrl,
+    testDirPath: p.testDirPath,
+    appDbUrl: p.appDbUrl ?? "http://0.0.0.0:8090",
+    appDbSuperuserEmail: p.appDbSuperuserEmail ?? "admin@admin.com",
+    appDbSuperuserPassword: p.appDbSuperuserPassword ?? "admin@admin.com",
+    testDbSuperuserEmail: p.testDbSuperuserEmail ?? "admin@admin.com",
+    testDbSuperuserPassword: p.testDbSuperuserPassword ?? "admin@admin.com",
+    pocketbaseBuildFilePath: p.pocketbaseBuildFilePath ?? "pocketbase/app-db/builds/app-db",
+  });
 };

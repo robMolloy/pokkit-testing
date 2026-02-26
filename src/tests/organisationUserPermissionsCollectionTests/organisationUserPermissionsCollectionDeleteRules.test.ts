@@ -1,7 +1,7 @@
 import type { ChildProcessWithoutNullStreams } from "child_process";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { PocketBase } from "../../config/pocketbaseConfig";
-import { setupAndServeTestDb } from "../helpers/_helpers";
+import { setupAndServeTestDbFromRunningInstanceWithDefaults } from "../helpers/_helpers";
 import { organisationSeedFactory } from "../helpers/organisationsCollectionHelpers";
 import { organisationUserPermissionSeedFactory } from "../helpers/organisationUserPermissionHelpers";
 import {
@@ -17,12 +17,7 @@ import fse from "fs-extra";
 
 // deleteRule: @request.auth.id != "" && @collection.organisationUserPermissions.userId ?= @request.auth.id && @collection.organisationUserPermissions.organisationId ?= organisationId && @collection.organisationUserPermissions.role ?= "admin" && @collection.organisationUserPermissions.status ?= "approved"
 
-const pocketbaseBuildFilePath = `pocketbase/app-db/builds/app-db`;
 const testDirPath = `_temp/organisationsUserPermissionsCollectionDeleteRules`;
-
-const appDbUrl = "http://0.0.0.0:8090";
-const appDbSuperuserEmail = "admin@admin.com";
-const appDbSuperuserPassword = "admin@admin.com";
 const testDbUrl = `http://0.0.0.0:8092`;
 const testDbSuperuserEmail = "admin@admin.com";
 const testDbSuperuserPassword = "admin@admin.com";
@@ -123,16 +118,10 @@ const setupOrgUserPermissionRecordForDeleteTests = async () => {
 
 describe(`organisation user permissions collection update rules - unhappy and happy paths`, () => {
   beforeAll(async () => {
-    spawnProcess = await setupAndServeTestDb({
-      spawnProcess,
-      pocketbaseBuildFilePath,
+    await spawnProcess?.kill("SIGTERM");
+    spawnProcess = await setupAndServeTestDbFromRunningInstanceWithDefaults({
       testDirPath,
-      appDbUrl,
-      appDbSuperuserEmail,
-      appDbSuperuserPassword,
       testDbUrl,
-      testDbSuperuserEmail,
-      testDbSuperuserPassword,
     });
   });
 

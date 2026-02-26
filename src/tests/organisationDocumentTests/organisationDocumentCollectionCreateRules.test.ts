@@ -2,7 +2,7 @@ import { type ChildProcessWithoutNullStreams } from "child_process";
 import fse from "fs-extra";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { PocketBase } from "../../config/pocketbaseConfig";
-import { setupAndServeTestDb } from "../helpers/_helpers";
+import { setupAndServeTestDbFromRunningInstanceWithDefaults } from "../helpers/_helpers";
 import { organisationDocumentSeedFactory } from "../helpers/organisationDocumentsHelpers";
 import { organisationSeedFactory } from "../helpers/organisationsCollectionHelpers";
 import { organisationUserPermissionSeedFactory } from "../helpers/organisationUserPermissionHelpers";
@@ -17,12 +17,7 @@ import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
 import { userSeedFactory } from "../helpers/pocketbaseUserHelpers";
 import { parsedEnv } from "../helpers/testEnvHelpers";
 
-const pocketbaseBuildFilePath = `pocketbase/app-db/builds/app-db`;
 const testDirPath = `_temp/organisationDocumentCollectionCreateRules`;
-
-const appDbUrl = "http://0.0.0.0:8090";
-const appDbSuperuserEmail = "admin@admin.com";
-const appDbSuperuserPassword = "admin@admin.com";
 const testDbUrl = `http://0.0.0.0:8051`;
 const testDbSuperuserEmail = "admin@admin.com";
 const testDbSuperuserPassword = "admin@admin.com";
@@ -153,16 +148,10 @@ const getImage1File = async () => {
 
 describe(`organisation documents collection create rules - happy and unhappy paths`, () => {
   beforeAll(async () => {
-    spawnProcess = await setupAndServeTestDb({
-      spawnProcess,
-      pocketbaseBuildFilePath,
+    await spawnProcess?.kill("SIGTERM");
+    spawnProcess = await setupAndServeTestDbFromRunningInstanceWithDefaults({
       testDirPath,
-      appDbUrl,
-      appDbSuperuserEmail,
-      appDbSuperuserPassword,
       testDbUrl,
-      testDbSuperuserEmail,
-      testDbSuperuserPassword,
     });
   });
 

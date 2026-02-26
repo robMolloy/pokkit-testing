@@ -3,18 +3,13 @@ import { PocketBase } from "../../config/pocketbaseConfig";
 import { usersCollectionName } from "../helpers/pocketbaseMetadata";
 import { createUserEmailPasswordData, createUserRecord } from "../helpers/pocketbaseUserHelpers";
 import type { ChildProcessWithoutNullStreams } from "child_process";
-import { setupAndServeTestDb } from "../helpers/_helpers";
+import { setupAndServeTestDbFromRunningInstanceWithDefaults } from "../helpers/_helpers";
 import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
 import fse from "fs-extra";
 
 // id = @request.auth.id
 
-const pocketbaseBuildFilePath = `pocketbase/app-db/builds/app-db`;
 const testDirPath = `_temp/usersCollectionUpdateRules`;
-
-const appDbUrl = "http://0.0.0.0:8090";
-const appDbSuperuserEmail = "admin@admin.com";
-const appDbSuperuserPassword = "admin@admin.com";
 const testDbUrl = `http://0.0.0.0:8105`;
 const testDbSuperuserEmail = "admin@admin.com";
 const testDbSuperuserPassword = "admin@admin.com";
@@ -25,16 +20,10 @@ let spawnProcess: ChildProcessWithoutNullStreams | undefined;
 
 describe(`PocketBase user collection update rules as user`, () => {
   beforeAll(async () => {
-    spawnProcess = await setupAndServeTestDb({
-      spawnProcess,
-      pocketbaseBuildFilePath,
+    await spawnProcess?.kill("SIGTERM");
+    spawnProcess = await setupAndServeTestDbFromRunningInstanceWithDefaults({
       testDirPath,
-      appDbUrl,
-      appDbSuperuserEmail,
-      appDbSuperuserPassword,
       testDbUrl,
-      testDbSuperuserEmail,
-      testDbSuperuserPassword,
     });
   });
 

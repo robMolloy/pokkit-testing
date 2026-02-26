@@ -1,7 +1,7 @@
 import type { ChildProcessWithoutNullStreams } from "child_process";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { PocketBase } from "../../config/pocketbaseConfig";
-import { setupAndServeTestDb } from "../helpers/_helpers";
+import { setupAndServeTestDbFromRunningInstanceWithDefaults } from "../helpers/_helpers";
 import { createGlobalUserPermissionRecordSeedData } from "../helpers/globalUserPermissionHelpers";
 import {
   globalUserPermissionsCollectionName,
@@ -16,12 +16,7 @@ import fse from "fs-extra";
 // Standard: @request.auth.id != "" && @request.auth.id = id
 // Admin:    @collection.globalUserPermissions.id ?= @request.auth.id && @collection.globalUserPermissions.role ?= "admin"
 
-const pocketbaseBuildFilePath = `pocketbase/app-db/builds/app-db`;
 const testDirPath = `_temp/globalUserPermissionsCollectionUpdateRules`;
-
-const appDbUrl = "http://0.0.0.0:8090";
-const appDbSuperuserEmail = "admin@admin.com";
-const appDbSuperuserPassword = "admin@admin.com";
 const testDbUrl = `http://0.0.0.0:8064`;
 const testDbSuperuserEmail = "admin@admin.com";
 const testDbSuperuserPassword = "admin@admin.com";
@@ -32,16 +27,10 @@ let spawnProcess: ChildProcessWithoutNullStreams | undefined;
 
 describe(`PocketBase globalUserPermissions collection view rules as standard user`, () => {
   beforeAll(async () => {
-    spawnProcess = await setupAndServeTestDb({
-      spawnProcess,
-      pocketbaseBuildFilePath,
+    await spawnProcess?.kill("SIGTERM");
+    spawnProcess = await setupAndServeTestDbFromRunningInstanceWithDefaults({
       testDirPath,
-      appDbUrl,
-      appDbSuperuserEmail,
-      appDbSuperuserPassword,
       testDbUrl,
-      testDbSuperuserEmail,
-      testDbSuperuserPassword,
     });
   });
 

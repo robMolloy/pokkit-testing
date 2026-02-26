@@ -25,3 +25,10 @@ export const clearDatabase = async (p: {
 
   superuserPb.authStore.clear();
 };
+export const clearDatabaseWithDefaults = async (p: { dbUrl: string }) => {
+  return clearDatabase({
+    dbUrl: p.dbUrl,
+    dbSuperuserEmail: "admin@admin.com",
+    dbSuperuserPassword: "admin@admin.com",
+  });
+};
