@@ -5,8 +5,13 @@ import fse from "fs-extra";
 import type { CollectionModel } from "pocketbase";
 
 const sandboxedPbBuildFileName = "sandboxedPbBuild";
+
 const getDbServeUrlFromDbUrl = (dbUrl: string) => dbUrl.replace("http://", "");
 
+/**
+ * Starts a sandboxed PocketBase build and waits until the server reports it is listening.
+ * Logs are appended to `pocketbase.log` in the sandbox directory.
+ */
 const serveSandboxPbBuild = async (p: {
   sandboxDirPath: string;
   dbUrl: string;
@@ -37,6 +42,7 @@ const serveSandboxPbBuild = async (p: {
   });
 };
 
+/** Creates or updates the superuser credentials via the PocketBase CLI `superuser upsert` command. */
 const upsertAdminCredentials = async (p: {
   pbBuildFilePath: string;
   dbSuperuserEmail: string;
@@ -56,6 +62,7 @@ const upsertAdminCredentials = async (p: {
   });
 };
 
+/** Authenticates as superuser and returns the full collection schema from a running PocketBase instance. */
 const getCollectionsFromDb = async (p: {
   dbUrl: string;
   dbSuperuserEmail: string;
@@ -69,6 +76,7 @@ const getCollectionsFromDb = async (p: {
   return collections;
 };
 
+/** Authenticates as superuser and imports collection definitions into a PocketBase instance. */
 const importCollectionsToDb = async (p: {
   collections: CollectionModel[];
   dbUrl: string;
@@ -83,23 +91,10 @@ const importCollectionsToDb = async (p: {
   await testPb.collections.import(p.collections);
 };
 
-export const getFileNameFromFilePath = (filePath: string) => {
-  return filePath
-    .split("/")
-    .filter((x) => !!x)
-    .slice(-1)[0]!;
-};
-export const getPortNumberFromDbUrl = (url: string) => {
-  const portNumberStr = url
-    .split(":")
-    .filter((x) => !!x)
-    .slice(-1)[0]
-    ?.replace(/\D+/g, "");
-  const portNumber = portNumberStr ? parseInt(portNumberStr) : undefined;
-
-  return !portNumber || isNaN(portNumber) ? undefined : portNumber;
-};
-
+/**
+ * Prepares an isolated sandbox directory by copying the PocketBase build binary
+ * into it as `sandboxedPbBuild`.
+ */
 const createPbSandboxFromRunningInstance = async (p: {
   pbBuildFilePath: string;
   appDbUrl: string;
@@ -116,6 +111,10 @@ const createPbSandboxFromRunningInstance = async (p: {
 };
 
 type TSetupAndServeTestDbFromRunningInstance = Parameters<typeof setupAndServeSanboxedPbBuild>[0];
+/**
+ * Creates a sandbox PocketBase instance, serves it, seeds superuser credentials,
+ * and copies collection schemas from the app database into the sandbox.
+ */
 export const setupAndServeSanboxedPbBuild = async (p: {
   pbBuildFilePath: string;
   appDbUrl: string;
@@ -158,6 +157,10 @@ export const setupAndServeSanboxedPbBuild = async (p: {
   return pbProcess;
 };
 
+/**
+ * Convenience wrapper around {@link setupAndServeSanboxedPbBuild} that fills in
+ * standard app and sandbox paths, URLs, and superuser credentials when omitted.
+ */
 export const setupAndServeSanboxedPbBuildWithDefaults = async (
   p: {
     sandboxDbUrl: string;
