@@ -74,6 +74,23 @@ const getCollectionsFromDb = async (p: {
   await testPb.collections.import(collections);
 };
 
+const getFileNameFromFilePath = (filePath: string) => {
+  return filePath
+    .split("/")
+    .filter((x) => !!x)
+    .slice(-1)[0]!;
+};
+const getPortNumberFromDbUrl = (url: string) => {
+  const portNumberStr = url
+    .split(":")
+    .filter((x) => !!x)
+    .slice(-1)[0]
+    ?.replace(/\D+/g, "");
+  const portNumber = portNumberStr ? parseInt(portNumberStr) : undefined;
+
+  return !portNumber || isNaN(portNumber) ? undefined : portNumber;
+};
+
 type TSetupAndServeTestDbFromRunningInstance = Parameters<
   typeof setupAndServeTestDbFromRunningInstance
 >[0];
@@ -87,17 +104,10 @@ export const setupAndServeTestDbFromRunningInstance = async (p: {
   testDbSuperuserEmail: string;
   testDbSuperuserPassword: string;
 }) => {
-  const pocketbaseBuildFileName = p.pocketbaseBuildFilePath
-    .split("/")
-    .filter((x) => !!x)
-    .slice(-1)[0]!;
+  const pocketbaseBuildFileName = getFileNameFromFilePath(p.pocketbaseBuildFilePath);
   const tempTestFilePath = `${p.testDirPath}/${pocketbaseBuildFileName}`;
 
-  const testDbPortNumber = p.testDbUrl
-    .split(":")
-    .filter((x) => !!x)
-    .slice(-1)[0]
-    ?.replace(/\D+/g, "");
+  const testDbPortNumber = getPortNumberFromDbUrl(p.testDbUrl);
   if (!testDbPortNumber) return;
 
   // deleteTempTestDir
