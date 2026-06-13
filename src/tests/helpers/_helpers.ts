@@ -4,15 +4,18 @@ import { spawn, type ChildProcessWithoutNullStreams } from "child_process";
 import fse from "fs-extra";
 import type { CollectionModel } from "pocketbase";
 
-const serveTempBuildOnPort = async (p: {
-  sandboxedPbBuildDirPath: string;
+const sandboxedPbBuildFileName = "sandboxedPbBuild";
+const getDbServeUrlFromDbUrl = (dbUrl: string) => dbUrl.replace("http://", "");
+
+const serveSandboxPbBuild = async (p: {
+  sandboxDirPath: string;
   dbUrl: string;
 }): Promise<ChildProcessWithoutNullStreams> => {
-  const dbServeUrl = p.dbUrl.replace("http://", "");
+  const dbServeUrl = getDbServeUrlFromDbUrl(p.dbUrl);
 
-  const sandboxedPbBuildFilePath = `${p.sandboxedPbBuildDirPath}/${sandboxedPbBuildFileName}`;
+  const sandboxedPbBuildFilePath = `${p.sandboxDirPath}/${sandboxedPbBuildFileName}`;
   const pbProcess = spawn(sandboxedPbBuildFilePath, ["serve", `--http=${dbServeUrl}`]);
-  const logStream = fse.createWriteStream(`${p.sandboxedPbBuildDirPath}/pocketbase.log`, {
+  const logStream = fse.createWriteStream(`${p.sandboxDirPath}/pocketbase.log`, {
     flags: "a",
   });
 
@@ -35,15 +38,15 @@ const serveTempBuildOnPort = async (p: {
 };
 
 const upsertAdminCredentials = async (p: {
-  tempTestFilePath: string;
-  testDbSuperuserEmail: string;
-  testDbSuperuserPassword: string;
+  pbBuildFilePath: string;
+  dbSuperuserEmail: string;
+  dbSuperuserPassword: string;
 }) => {
-  const upsertProcess = spawn(`${p.tempTestFilePath}`, [
+  const upsertProcess = spawn(`${p.pbBuildFilePath}`, [
     "superuser",
     "upsert",
-    p.testDbSuperuserEmail,
-    p.testDbSuperuserPassword,
+    p.dbSuperuserEmail,
+    p.dbSuperuserPassword,
   ]);
 
   return new Promise((resolve) => {
@@ -97,8 +100,6 @@ export const getPortNumberFromDbUrl = (url: string) => {
   return !portNumber || isNaN(portNumber) ? undefined : portNumber;
 };
 
-const sandboxedPbBuildFileName = "sandboxedPbBuild";
-
 const createPbSandboxFromRunningInstance = async (p: {
   pbBuildFilePath: string;
   appDbUrl: string;
@@ -114,33 +115,31 @@ const createPbSandboxFromRunningInstance = async (p: {
   return { sandboxedPbBuildFilePath };
 };
 
-type TSetupAndServeTestDbFromRunningInstance = Parameters<
-  typeof setupAndServeTestDbFromRunningInstance
->[0];
-export const setupAndServeTestDbFromRunningInstance = async (p: {
+type TSetupAndServeTestDbFromRunningInstance = Parameters<typeof setupAndServeSanboxedPbBuild>[0];
+export const setupAndServeSanboxedPbBuild = async (p: {
   pbBuildFilePath: string;
   appDbUrl: string;
   appDbSuperuserEmail: string;
   appDbSuperuserPassword: string;
-  testDirPath: string;
-  testDbUrl: string;
-  testDbSuperuserEmail: string;
-  testDbSuperuserPassword: string;
+  sandboxDirPath: string;
+  sandboxDbUrl: string;
+  sandboxDbSuperuserEmail: string;
+  sandboxDbSuperuserPassword: string;
 }) => {
   const { sandboxedPbBuildFilePath } = await createPbSandboxFromRunningInstance({
     pbBuildFilePath: p.pbBuildFilePath,
     appDbUrl: p.appDbUrl,
-    sandboxDirPath: p.testDirPath,
+    sandboxDirPath: p.sandboxDirPath,
   });
 
-  const pbProcess = await serveTempBuildOnPort({
-    sandboxedPbBuildDirPath: p.testDirPath,
-    dbUrl: p.testDbUrl,
+  const pbProcess = await serveSandboxPbBuild({
+    sandboxDirPath: p.sandboxDirPath,
+    dbUrl: p.sandboxDbUrl,
   });
   await upsertAdminCredentials({
-    tempTestFilePath: sandboxedPbBuildFilePath,
-    testDbSuperuserEmail: p.testDbSuperuserEmail,
-    testDbSuperuserPassword: p.testDbSuperuserPassword,
+    pbBuildFilePath: sandboxedPbBuildFilePath,
+    dbSuperuserEmail: p.sandboxDbSuperuserEmail,
+    dbSuperuserPassword: p.sandboxDbSuperuserPassword,
   });
 
   const collections = await getCollectionsFromDb({
@@ -151,27 +150,28 @@ export const setupAndServeTestDbFromRunningInstance = async (p: {
 
   await importCollectionsToDb({
     collections,
-    dbUrl: p.testDbUrl,
-    dbSuperuserEmail: p.testDbSuperuserEmail,
-    dbSuperuserPassword: p.testDbSuperuserPassword,
+    dbUrl: p.sandboxDbUrl,
+    dbSuperuserEmail: p.sandboxDbSuperuserEmail,
+    dbSuperuserPassword: p.sandboxDbSuperuserPassword,
   });
 
   return pbProcess;
 };
-export const setupAndServeTestDbFromRunningInstanceWithDefaults = async (
+
+export const setupAndServeSanboxedPbBuildWithDefaults = async (
   p: {
-    testDbUrl: string;
-    testDirPath: string;
-  } & Partial<Omit<TSetupAndServeTestDbFromRunningInstance, "testDirPath" | "testDbUrl">>,
+    sandboxDbUrl: string;
+    sandboxDirPath: string;
+  } & Partial<Omit<TSetupAndServeTestDbFromRunningInstance, "sandboxDirPath" | "sandboxDbUrl">>,
 ) => {
-  return setupAndServeTestDbFromRunningInstance({
-    testDbUrl: p.testDbUrl,
-    testDirPath: p.testDirPath,
+  return setupAndServeSanboxedPbBuild({
+    pbBuildFilePath: p.pbBuildFilePath ?? "pocketbase/app-db/builds/app-db",
     appDbUrl: p.appDbUrl ?? "http://0.0.0.0:8090",
     appDbSuperuserEmail: p.appDbSuperuserEmail ?? "admin@admin.com",
     appDbSuperuserPassword: p.appDbSuperuserPassword ?? "admin@admin.com",
-    testDbSuperuserEmail: p.testDbSuperuserEmail ?? "admin@admin.com",
-    testDbSuperuserPassword: p.testDbSuperuserPassword ?? "admin@admin.com",
-    pbBuildFilePath: p.pbBuildFilePath ?? "pocketbase/app-db/builds/app-db",
+    sandboxDbUrl: p.sandboxDbUrl,
+    sandboxDirPath: p.sandboxDirPath,
+    sandboxDbSuperuserEmail: p.sandboxDbSuperuserEmail ?? "admin@admin.com",
+    sandboxDbSuperuserPassword: p.sandboxDbSuperuserPassword ?? "admin@admin.com",
   });
 };

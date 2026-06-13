@@ -1,7 +1,7 @@
 import type { ChildProcessWithoutNullStreams } from "node:child_process";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { PocketBase } from "../../config/pocketbaseConfig";
-import { setupAndServeTestDbFromRunningInstanceWithDefaults } from "../helpers/_helpers";
+import { setupAndServeSanboxedPbBuildWithDefaults } from "../helpers/_helpers";
 import { createGlobalUserPermissionRecordSeedData } from "../helpers/globalUserPermissionHelpers";
 import {
   globalUserPermissionsCollectionName,
@@ -28,9 +28,9 @@ let spawnProcess: ChildProcessWithoutNullStreams | undefined;
 describe(`PocketBase globalUserPermissions collection delete rules as standard user`, () => {
   beforeAll(async () => {
     await spawnProcess?.kill("SIGTERM");
-    spawnProcess = await setupAndServeTestDbFromRunningInstanceWithDefaults({
-      testDirPath,
-      testDbUrl,
+    spawnProcess = await setupAndServeSanboxedPbBuildWithDefaults({
+      sandboxDirPath: testDirPath,
+      sandboxDbUrl: testDbUrl,
     });
   });
 

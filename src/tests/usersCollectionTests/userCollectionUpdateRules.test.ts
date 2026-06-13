@@ -3,7 +3,7 @@ import { PocketBase } from "../../config/pocketbaseConfig";
 import { usersCollectionName } from "../helpers/pocketbaseMetadata";
 import { createUserEmailPasswordData, createUserRecord } from "../helpers/pocketbaseUserHelpers";
 import type { ChildProcessWithoutNullStreams } from "child_process";
-import { setupAndServeTestDbFromRunningInstanceWithDefaults } from "../helpers/_helpers";
+import { setupAndServeSanboxedPbBuildWithDefaults } from "../helpers/_helpers";
 import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
 import fse from "fs-extra";
 
@@ -21,9 +21,9 @@ let spawnProcess: ChildProcessWithoutNullStreams | undefined;
 describe(`PocketBase user collection update rules as user`, () => {
   beforeAll(async () => {
     await spawnProcess?.kill("SIGTERM");
-    spawnProcess = await setupAndServeTestDbFromRunningInstanceWithDefaults({
-      testDirPath,
-      testDbUrl,
+    spawnProcess = await setupAndServeSanboxedPbBuildWithDefaults({
+      sandboxDirPath: testDirPath,
+      sandboxDbUrl: testDbUrl,
     });
   });
 

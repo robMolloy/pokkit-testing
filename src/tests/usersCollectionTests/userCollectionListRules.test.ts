@@ -8,7 +8,7 @@ import { clearDatabase } from "../helpers/pocketbaseTestHelpers";
 import { createUserEmailPasswordData, createUserRecord } from "../helpers/pocketbaseUserHelpers";
 
 import { type ChildProcessWithoutNullStreams } from "child_process";
-import { setupAndServeTestDbFromRunningInstanceWithDefaults } from "../helpers/_helpers";
+import { setupAndServeSanboxedPbBuildWithDefaults } from "../helpers/_helpers";
 import fse from "fs-extra";
 
 // @request.auth.id = id || @collection.globalUserPermissions.userId ?= @request.auth.id && @collection.globalUserPermissions.role = "admin"
@@ -24,9 +24,9 @@ let spawnProcess: ChildProcessWithoutNullStreams | undefined;
 describe(`PocketBase user collection list rules as standard user`, () => {
   beforeAll(async () => {
     await spawnProcess?.kill("SIGTERM");
-    spawnProcess = await setupAndServeTestDbFromRunningInstanceWithDefaults({
-      testDirPath,
-      testDbUrl,
+    spawnProcess = await setupAndServeSanboxedPbBuildWithDefaults({
+      sandboxDirPath: testDirPath,
+      sandboxDbUrl: testDbUrl,
     });
   });
 

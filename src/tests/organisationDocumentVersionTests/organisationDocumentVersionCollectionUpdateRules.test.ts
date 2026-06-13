@@ -2,7 +2,7 @@ import { type ChildProcessWithoutNullStreams } from "child_process";
 import fse from "fs-extra";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { PocketBase } from "../../config/pocketbaseConfig";
-import { setupAndServeTestDbFromRunningInstanceWithDefaults } from "../helpers/_helpers";
+import { setupAndServeSanboxedPbBuildWithDefaults } from "../helpers/_helpers";
 import { organisationDocumentSeedFactory } from "../helpers/organisationDocumentsHelpers";
 import { organisationSeedFactory } from "../helpers/organisationsCollectionHelpers";
 import { organisationUserPermissionSeedFactory } from "../helpers/organisationUserPermissionHelpers";
@@ -177,9 +177,9 @@ let spawnProcess: ChildProcessWithoutNullStreams | undefined;
 describe(`organisation document versions collection update rules - happy and unhappy paths`, () => {
   beforeAll(async () => {
     await spawnProcess?.kill("SIGTERM");
-    spawnProcess = await setupAndServeTestDbFromRunningInstanceWithDefaults({
-      testDirPath,
-      testDbUrl,
+    spawnProcess = await setupAndServeSanboxedPbBuildWithDefaults({
+      sandboxDirPath: testDirPath,
+      sandboxDbUrl: testDbUrl,
     });
   });
 

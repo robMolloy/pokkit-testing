@@ -1,7 +1,7 @@
 import type { ChildProcessWithoutNullStreams } from "child_process";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { PocketBase } from "../../config/pocketbaseConfig";
-import { setupAndServeTestDbFromRunningInstanceWithDefaults } from "../helpers/_helpers";
+import { setupAndServeSanboxedPbBuildWithDefaults } from "../helpers/_helpers";
 import { createGlobalUserPermissionRecordSeedData } from "../helpers/globalUserPermissionHelpers";
 import { createOrganisationRecordSeedData } from "../helpers/organisationsCollectionHelpers";
 import {
@@ -30,9 +30,9 @@ let spawnProcess: ChildProcessWithoutNullStreams | undefined;
 describe(`PocketBase organisations collection create rules as standard/admin user`, () => {
   beforeAll(async () => {
     await spawnProcess?.kill("SIGTERM");
-    spawnProcess = await setupAndServeTestDbFromRunningInstanceWithDefaults({
-      testDirPath,
-      testDbUrl,
+    spawnProcess = await setupAndServeSanboxedPbBuildWithDefaults({
+      sandboxDirPath: testDirPath,
+      sandboxDbUrl: testDbUrl,
     });
   });
 
