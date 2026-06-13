@@ -5,21 +5,22 @@ import fse from "fs-extra";
 import type { CollectionModel } from "pocketbase";
 
 const serveTempBuildOnPort = async (p: {
-  tempTestFilePath: string;
-  tempTestDirPath: string;
+  sandboxedPbBuildDirPath: string;
   dbUrl: string;
 }): Promise<ChildProcessWithoutNullStreams> => {
   const dbServeUrl = p.dbUrl.replace("http://", "");
-  const dbPortNumber = p.dbUrl.split(":").slice(-1)[0]!;
 
-  const pbProcess = spawn(p.tempTestFilePath, ["serve", `--http=${dbServeUrl}`]);
-  const logStream = fse.createWriteStream(`${p.tempTestDirPath}/pocketbase.log`, { flags: "a" });
+  const sandboxedPbBuildFilePath = `${p.sandboxedPbBuildDirPath}/${sandboxedPbBuildFileName}`;
+  const pbProcess = spawn(sandboxedPbBuildFilePath, ["serve", `--http=${dbServeUrl}`]);
+  const logStream = fse.createWriteStream(`${p.sandboxedPbBuildDirPath}/pocketbase.log`, {
+    flags: "a",
+  });
 
   return new Promise((resolve) => {
     pbProcess.stdout.on("data", (data) => {
       const strData = data.toString();
       logStream.write(`[stdout] ${data.toString()}\n`);
-      if (strData.includes(dbPortNumber)) resolve(pbProcess);
+      if (strData.includes("Server started at")) resolve(pbProcess);
     });
 
     pbProcess.stderr.on("data", (data) => {
@@ -79,13 +80,13 @@ const importCollectionsToDb = async (p: {
   await testPb.collections.import(p.collections);
 };
 
-const getFileNameFromFilePath = (filePath: string) => {
+export const getFileNameFromFilePath = (filePath: string) => {
   return filePath
     .split("/")
     .filter((x) => !!x)
     .slice(-1)[0]!;
 };
-const getPortNumberFromDbUrl = (url: string) => {
+export const getPortNumberFromDbUrl = (url: string) => {
   const portNumberStr = url
     .split(":")
     .filter((x) => !!x)
@@ -96,11 +97,28 @@ const getPortNumberFromDbUrl = (url: string) => {
   return !portNumber || isNaN(portNumber) ? undefined : portNumber;
 };
 
+const sandboxedPbBuildFileName = "sandboxedPbBuild";
+
+const createPbSandboxFromRunningInstance = async (p: {
+  pbBuildFilePath: string;
+  appDbUrl: string;
+  sandboxDirPath: string;
+}) => {
+  const sandboxedPbBuildFilePath = `${p.sandboxDirPath}/${sandboxedPbBuildFileName}`;
+
+  fse.removeSync(p.sandboxDirPath);
+
+  fse.ensureDirSync(p.sandboxDirPath);
+  fse.copyFileSync(p.pbBuildFilePath, sandboxedPbBuildFilePath);
+
+  return { sandboxedPbBuildFilePath };
+};
+
 type TSetupAndServeTestDbFromRunningInstance = Parameters<
   typeof setupAndServeTestDbFromRunningInstance
 >[0];
 export const setupAndServeTestDbFromRunningInstance = async (p: {
-  pocketbaseBuildFilePath: string;
+  pbBuildFilePath: string;
   appDbUrl: string;
   appDbSuperuserEmail: string;
   appDbSuperuserPassword: string;
@@ -109,28 +127,22 @@ export const setupAndServeTestDbFromRunningInstance = async (p: {
   testDbSuperuserEmail: string;
   testDbSuperuserPassword: string;
 }) => {
-  const pocketbaseBuildFileName = getFileNameFromFilePath(p.pocketbaseBuildFilePath);
-  const tempTestFilePath = `${p.testDirPath}/${pocketbaseBuildFileName}`;
+  const { sandboxedPbBuildFilePath } = await createPbSandboxFromRunningInstance({
+    pbBuildFilePath: p.pbBuildFilePath,
+    appDbUrl: p.appDbUrl,
+    sandboxDirPath: p.testDirPath,
+  });
 
-  const testDbPortNumber = getPortNumberFromDbUrl(p.testDbUrl);
-  if (!testDbPortNumber) return;
-
-  // deleteTempTestDir
-  fse.removeSync(p.testDirPath);
-
-  // copyBuildToTempFolder
-  fse.ensureDirSync(p.testDirPath);
-  fse.copyFileSync(p.pocketbaseBuildFilePath, tempTestFilePath);
   const pbProcess = await serveTempBuildOnPort({
-    tempTestFilePath,
-    tempTestDirPath: p.testDirPath,
+    sandboxedPbBuildDirPath: p.testDirPath,
     dbUrl: p.testDbUrl,
   });
   await upsertAdminCredentials({
-    tempTestFilePath,
+    tempTestFilePath: sandboxedPbBuildFilePath,
     testDbSuperuserEmail: p.testDbSuperuserEmail,
     testDbSuperuserPassword: p.testDbSuperuserPassword,
   });
+
   const collections = await getCollectionsFromDb({
     dbUrl: p.appDbUrl,
     dbSuperuserEmail: p.appDbSuperuserEmail,
@@ -160,6 +172,6 @@ export const setupAndServeTestDbFromRunningInstanceWithDefaults = async (
     appDbSuperuserPassword: p.appDbSuperuserPassword ?? "admin@admin.com",
     testDbSuperuserEmail: p.testDbSuperuserEmail ?? "admin@admin.com",
     testDbSuperuserPassword: p.testDbSuperuserPassword ?? "admin@admin.com",
-    pocketbaseBuildFilePath: p.pocketbaseBuildFilePath ?? "pocketbase/app-db/builds/app-db",
+    pbBuildFilePath: p.pbBuildFilePath ?? "pocketbase/app-db/builds/app-db",
   });
 };
