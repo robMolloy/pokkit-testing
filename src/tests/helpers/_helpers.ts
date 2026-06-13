@@ -2,6 +2,7 @@ import { PocketBase } from "../../config/pocketbaseConfig";
 
 import { spawn, type ChildProcessWithoutNullStreams } from "child_process";
 import fse from "fs-extra";
+import type { CollectionModel } from "pocketbase";
 
 const serveTempBuildOnPort = async (p: {
   tempTestFilePath: string;
@@ -52,26 +53,30 @@ const upsertAdminCredentials = async (p: {
 };
 
 const getCollectionsFromDb = async (p: {
-  appDbUrl: string;
-  testDbUrl: string;
-  appDbSuperuserEmail: string;
-  appDbSuperuserPassword: string;
-  testDbSuperuserEmail: string;
-  testDbSuperuserPassword: string;
+  dbUrl: string;
+  dbSuperuserEmail: string;
+  dbSuperuserPassword: string;
 }) => {
-  const appPb = new PocketBase(p.appDbUrl);
-  await appPb
-    .collection("_superusers")
-    .authWithPassword(p.appDbSuperuserEmail, p.appDbSuperuserPassword);
+  const appPb = new PocketBase(p.dbUrl);
+  await appPb.collection("_superusers").authWithPassword(p.dbSuperuserEmail, p.dbSuperuserPassword);
 
   const collections = await appPb.collections.getFullList();
 
-  const testPb = new PocketBase(p.testDbUrl);
+  return collections;
+};
+
+const importCollectionsToDb = async (p: {
+  collections: CollectionModel[];
+  dbUrl: string;
+  dbSuperuserEmail: string;
+  dbSuperuserPassword: string;
+}) => {
+  const testPb = new PocketBase(p.dbUrl);
   await testPb
     .collection("_superusers")
-    .authWithPassword(p.testDbSuperuserEmail, p.testDbSuperuserPassword);
+    .authWithPassword(p.dbSuperuserEmail, p.dbSuperuserPassword);
 
-  await testPb.collections.import(collections);
+  await testPb.collections.import(p.collections);
 };
 
 const getFileNameFromFilePath = (filePath: string) => {
@@ -126,13 +131,17 @@ export const setupAndServeTestDbFromRunningInstance = async (p: {
     testDbSuperuserEmail: p.testDbSuperuserEmail,
     testDbSuperuserPassword: p.testDbSuperuserPassword,
   });
-  await getCollectionsFromDb({
-    appDbUrl: p.appDbUrl,
-    testDbUrl: p.testDbUrl,
-    appDbSuperuserEmail: p.appDbSuperuserEmail,
-    appDbSuperuserPassword: p.appDbSuperuserPassword,
-    testDbSuperuserEmail: p.testDbSuperuserEmail,
-    testDbSuperuserPassword: p.testDbSuperuserPassword,
+  const collections = await getCollectionsFromDb({
+    dbUrl: p.appDbUrl,
+    dbSuperuserEmail: p.appDbSuperuserEmail,
+    dbSuperuserPassword: p.appDbSuperuserPassword,
+  });
+
+  await importCollectionsToDb({
+    collections,
+    dbUrl: p.testDbUrl,
+    dbSuperuserEmail: p.testDbSuperuserEmail,
+    dbSuperuserPassword: p.testDbSuperuserPassword,
   });
 
   return pbProcess;
