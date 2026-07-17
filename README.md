@@ -11,7 +11,7 @@ A testing framework for PocketBase database functionality. This project provides
 
 ## Getting Started
 
-To run the repo successfully, open 5 separate terminals and run each of these commands concurrently:
+To run the repo successfully, open 2 separate terminals and run each of these commands:
 
 1. **Terminal 1 - Run tests:**
 
@@ -24,22 +24,3 @@ To run the repo successfully, open 5 separate terminals and run each of these co
    ```bash
    npm run dev2
    ```
-
-3. **Terminal 3 - Start app database:**
-
-   ```bash
-   npm run dev3
-   ```
-
-4. **Terminal 4 - Start test database:**
-
-   ```bash
-   npm run dev4
-   ```
-
-5. **Terminal 5 - Watch for migration/hook changes and sync test database:**
-   ```bash
-   npm run dev5
-   ```
-
-These commands enable you to develop and test PocketBase functionality seamlessly. The test database automatically clones from the app database seed whenever migrations or hooks change.
