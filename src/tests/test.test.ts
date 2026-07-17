@@ -1,65 +1,67 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import {
   clearDb,
   killPocketbaseInstanceByDbUrl,
   killPocketbaseInstanceBySpawnProcess,
   setupAndServeDb,
 } from "@repo/pokkit-testing";
-import type { CollectionModel } from "pocketbase";
 import type { ChildProcessWithoutNullStreams } from "child_process";
-import { PocketBase } from "../config/pocketbaseConfig";
 import fse from "fs-extra";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { PocketBase } from "../config/pocketbaseConfig";
 import { usersCollectionName } from "../metadata/pocketbaseMetadata";
 import {
-  createRandomUserRecord,
   createRandomUserEmailPasswordData,
+  createRandomUserRecord,
 } from "../utils/pocketbaseUserHelpers";
 
-const sandboxedDirPath = `_temp/test`;
-const dbBuildFilePath = `${sandboxedDirPath}/app-db`;
-const dbLogFilePath = `${sandboxedDirPath}/log.txt`;
+const dbBuildFilePath = "./pb/app-db";
 
-const dbUrl = `http://0.0.0.0:8113`;
-const dbSuperuserEmail = "admin@admin.com";
-const dbSuperuserPassword = "admin@admin.com";
+const sandboxDirPath = `_temp/test`;
+const sandboxDbBuildFilePath = `${sandboxDirPath}/app-db`;
+const sandboxDbLogFilePath = `${sandboxDirPath}/log.txt`;
 
-const createPbInstance = () => new PocketBase(dbUrl);
+const sandboxDbPortNumber = 8113;
+const sandboxDbUrl = `http://0.0.0.0:${sandboxDbPortNumber}`;
+const sandboxDbSuperuserEmail = "admin@admin.com";
+const sandboxDbSuperuserPassword = "admin@admin.com";
+
+const createPbInstance = () => new PocketBase(sandboxDbUrl);
 let spawnProcess: ChildProcessWithoutNullStreams | undefined;
 
 describe("test rules", () => {
   beforeAll(async () => {
     spawnProcess = await setupAndServeDb({
       writeDbBuildToFilePathFn: async () => {
-        await fse.copyFileSync("./pb/app-db", dbBuildFilePath);
+        await fse.copyFileSync(dbBuildFilePath, sandboxDbBuildFilePath);
       },
-      getCollectionsFn: async function (): Promise<CollectionModel[]> {
-        const collectionsJson = await fse.readFileSync("./pb/collections.json", "utf8");
-        const collections: CollectionModel[] = JSON.parse(collectionsJson);
-        return collections;
-      },
-      dbBuildFilePath,
-      dbLogFilePath,
-      dbUrl,
-      dbSuperuserEmail,
-      dbSuperuserPassword,
+      applyCollections: { required: false },
+      dbBuildFilePath: sandboxDbBuildFilePath,
+      dbLogFilePath: sandboxDbLogFilePath,
+      dbUrl: sandboxDbUrl,
+      dbSuperuserEmail: sandboxDbSuperuserEmail,
+      dbSuperuserPassword: sandboxDbSuperuserPassword,
     });
   });
 
   afterAll(async () => {
     if (spawnProcess) killPocketbaseInstanceBySpawnProcess(spawnProcess);
-    killPocketbaseInstanceByDbUrl(dbUrl);
-    await fse.remove(sandboxedDirPath);
+    killPocketbaseInstanceByDbUrl(sandboxDbUrl);
+    await fse.remove(sandboxDirPath);
   });
 
   beforeEach(async () => {
-    await clearDb({ dbUrl, dbSuperuserEmail, dbSuperuserPassword });
+    await clearDb({
+      dbUrl: sandboxDbUrl,
+      dbSuperuserEmail: sandboxDbSuperuserEmail,
+      dbSuperuserPassword: sandboxDbSuperuserPassword,
+    });
   });
 
   it("true test", async () => {
     expect(true).toBe(true);
   });
 
-  it("pb test", async () => {
+  it("rejects invalid authentication", async () => {
     const pb = createPbInstance();
     expect(pb).toBeInstanceOf(PocketBase);
     const userPb = createPbInstance();
